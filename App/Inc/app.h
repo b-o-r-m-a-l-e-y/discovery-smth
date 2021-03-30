@@ -8,6 +8,9 @@
 #ifndef APP_H_
 #define APP_H_
 
+#include "lsm303dlhc.h"
+#include "main.h"
+
 extern "C" void main_app_wrp();
 
 class MainApp {
@@ -26,6 +29,8 @@ public:
 	void run();
 private:
 	MainApp();
+
+	LSM303DLHC lsm303dhlc;
 };
 
 #endif /* APP_H_ */
