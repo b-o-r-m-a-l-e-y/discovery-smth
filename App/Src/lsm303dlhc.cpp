@@ -393,19 +393,214 @@ LSM303DLHC::LSM303DLHC(I2C_HandleTypeDef* hi2c, GPIO_TypeDef* DRDY_GPIO, uint32_
 	this->DRDY_GPIO = DRDY_GPIO;
 }
 
-uint8_t LSM303DLHC::readID()
+HAL_StatusTypeDef LSM303DLHC::initAcc()
 {
-	return readRegister(LSM303DLHC_WHO_AM_I_ADDR) & ~(1<<0);
+	uint8_t ctrl_reg_1 = 0;
+	ctrl_reg_1 = LSM303DLHC_ODR_50_HZ | LSM303DLHC_X_ENABLE |
+			LSM303DLHC_Y_ENABLE | LSM303DLHC_Z_ENABLE;
+	error_status = writeRegisterAcc(LSM303DLHC_CTRL_REG1_A, ctrl_reg_1);
+	return error_status;
 }
 
-HAL_StatusTypeDef LSM303DLHC::writeRegister(uint8_t regAddr, uint8_t reg)
+HAL_StatusTypeDef LSM303DLHC::initMagnetometer()
+{
+	error_status = writeRegisterMag(LSM303DLHC_CRA_REG_M,
+			LSM303DLHC_TEMPSENSOR_ENABLE | LSM303DLHC_ODR_15_HZ);
+	error_status = writeRegisterMag(LSM303DLHC_CRB_REG_M, LSM303DLHC_FS_4_0_GA);
+	error_status = writeRegisterMag(LSM303DLHC_MR_REG_M, LSM303DLHC_CONTINUOS_CONVERSION);
+	return error_status;
+}
+
+uint8_t LSM303DLHC::readID()
+{
+	return readRegisterAcc(LSM303DLHC_WHO_AM_I_ADDR) & ~(1<<0);
+}
+
+HAL_StatusTypeDef LSM303DLHC::writeRegisterAcc(uint8_t regAddr, uint8_t reg)
 {
 	return HAL_I2C_Mem_Write(this->hi2c, ACC_I2C_ADDRESS, regAddr, 1, &reg, 1, I2C_TIMEOUT);
 }
 
-uint8_t LSM303DLHC::readRegister(uint8_t regAddr)
+uint8_t LSM303DLHC::readRegisterAcc(uint8_t regAddr)
 {
 	uint8_t retVal = 0;
-	HAL_I2C_Mem_Read(this->hi2c, ACC_I2C_ADDRESS, regAddr, 1, &retVal, 1, I2C_TIMEOUT);
+	HAL_I2C_Mem_Read(this->hi2c, ACC_I2C_ADDRESS | (1<<0), regAddr, 1, &retVal, 1, I2C_TIMEOUT);
 	return retVal;
+}
+
+HAL_StatusTypeDef LSM303DLHC::writeRegisterMag(uint8_t regAddr, uint8_t reg)
+{
+	return HAL_I2C_Mem_Write(this->hi2c, MAG_I2C_ADDRESS, regAddr, 1, &reg, 1, I2C_TIMEOUT);
+}
+
+uint8_t LSM303DLHC::readRegisterMag(uint8_t regAddr)
+{
+	uint8_t retVal = 0;
+	HAL_I2C_Mem_Read(this->hi2c, MAG_I2C_ADDRESS, regAddr, 1, &retVal, 1, I2C_TIMEOUT);
+	return retVal;
+}
+
+HAL_StatusTypeDef LSM303DLHC::getXYZ(int16_t* pData)
+{
+	int16_t pnRawData[3];
+	uint8_t ctrlx[2]={0,0};
+	int8_t buffer[6];
+	uint8_t sensitivity = LSM303DLHC_ACC_SENSITIVITY_2G;
+
+	/* Read the acceleration control register content */
+	ctrlx[0] = readRegisterAcc(LSM303DLHC_CTRL_REG4_A);
+	ctrlx[1] = readRegisterAcc(LSM303DLHC_CTRL_REG5_A);
+
+	/* Read output register X, Y & Z acceleration */
+	buffer[0] = readRegisterAcc(LSM303DLHC_OUT_X_L_A);
+	buffer[1] = readRegisterAcc(LSM303DLHC_OUT_X_H_A);
+	buffer[2] = readRegisterAcc(LSM303DLHC_OUT_Y_L_A);
+	buffer[3] = readRegisterAcc(LSM303DLHC_OUT_Y_H_A);
+	buffer[4] = readRegisterAcc(LSM303DLHC_OUT_Z_L_A);
+	buffer[5] = readRegisterAcc(LSM303DLHC_OUT_Z_H_A);
+
+	/* Check in the control register4 the data alignment*/
+	if(!(ctrlx[0] & LSM303DLHC_BLE_MSB))
+	{
+		for(uint8_t i=0; i<3; i++)
+		{
+			pnRawData[i]=((int16_t)((uint16_t)buffer[2*i+1] << 8) + buffer[2*i]);
+		}
+	}
+	else /* Big Endian Mode */
+	{
+		for(uint8_t i=0; i<3; i++)
+		{
+			pnRawData[i]=((int16_t)((uint16_t)buffer[2*i] << 8) + buffer[2*i+1]);
+		}
+	}
+
+	/* Normal mode */
+	/* Switch the sensitivity value set in the CRTL4 */
+	switch(ctrlx[0] & LSM303DLHC_FULLSCALE_16G)
+	{
+	case LSM303DLHC_FULLSCALE_2G:
+		sensitivity = LSM303DLHC_ACC_SENSITIVITY_2G;
+		break;
+	case LSM303DLHC_FULLSCALE_4G:
+		sensitivity = LSM303DLHC_ACC_SENSITIVITY_4G;
+		break;
+	case LSM303DLHC_FULLSCALE_8G:
+		sensitivity = LSM303DLHC_ACC_SENSITIVITY_8G;
+		break;
+	case LSM303DLHC_FULLSCALE_16G:
+		sensitivity = LSM303DLHC_ACC_SENSITIVITY_16G;
+		break;
+	}
+
+	/* Obtain the mg value for the three axis */
+	for(uint8_t i=0; i<3; i++)
+	{
+		pData[i]=(pnRawData[i] * sensitivity);
+	}
+
+	return HAL_OK;
+}
+
+HAL_StatusTypeDef LSM303DLHC::getMagnetomerMeasurements(int16_t* pData)
+{
+	int16_t pnRawData[3];
+	uint8_t ctrlx[2]={0,0};
+	int8_t buffer[6];
+	uint16_t sensitivityXY = LSM303DLHC_M_SENSITIVITY_XY_1_3Ga;
+	uint16_t sensitivityZ  = LSM303DLHC_M_SENSITIVITY_Z_1_3Ga;
+
+	/* Read the acceleration control register content */
+	ctrlx[0] = readRegisterAcc(LSM303DLHC_CTRL_REG4_A);
+	ctrlx[1] = readRegisterMag(LSM303DLHC_CRB_REG_M);
+
+	/* Read output register X, Y & Z acceleration */
+	buffer[0] = readRegisterMag(LSM303DLHC_OUT_X_H_M);
+	buffer[1] = readRegisterMag(LSM303DLHC_OUT_X_L_M);
+	buffer[2] = readRegisterMag(LSM303DLHC_OUT_Y_L_M);
+	buffer[3] = readRegisterMag(LSM303DLHC_OUT_Y_H_M);
+	buffer[4] = readRegisterMag(LSM303DLHC_OUT_Z_L_M);
+	buffer[5] = readRegisterMag(LSM303DLHC_OUT_Z_H_M);
+
+	/* Check in the control register4 the data alignment*/
+	if(!(ctrlx[0] & LSM303DLHC_BLE_MSB))
+	{
+		for(uint8_t i=0; i<3; i++)
+		{
+			pnRawData[i]=((int16_t)((uint16_t)buffer[2*i+1] << 8) + buffer[2*i]);
+		}
+	}
+	else /* Big Endian Mode */
+	{
+		for(uint8_t i=0; i<3; i++)
+		{
+			pnRawData[i]=((int16_t)((uint16_t)buffer[2*i] << 8) + buffer[2*i+1]);
+		}
+	}
+
+	/* Normal mode */
+	/* Switch the sensitivity value set in the CRTL4 */
+	switch(ctrlx[1] & LSM303DLHC_FS_8_1_GA)
+	{
+	case LSM303DLHC_FS_1_3_GA:
+		sensitivityXY = LSM303DLHC_M_SENSITIVITY_XY_1_3Ga;
+		sensitivityZ = LSM303DLHC_M_SENSITIVITY_Z_1_3Ga;
+		break;
+	case LSM303DLHC_FS_1_9_GA:
+		sensitivityXY = LSM303DLHC_M_SENSITIVITY_XY_1_9Ga;
+		sensitivityZ = LSM303DLHC_M_SENSITIVITY_Z_1_9Ga;
+		break;
+	case LSM303DLHC_FS_2_5_GA:
+		sensitivityXY = LSM303DLHC_M_SENSITIVITY_XY_2_5Ga;
+		sensitivityZ = LSM303DLHC_M_SENSITIVITY_Z_2_5Ga;
+		break;
+	case LSM303DLHC_FS_4_0_GA:
+		sensitivityXY = LSM303DLHC_M_SENSITIVITY_XY_4Ga;
+		sensitivityZ = LSM303DLHC_M_SENSITIVITY_Z_4Ga;
+		break;
+	case LSM303DLHC_FS_4_7_GA:
+		sensitivityXY = LSM303DLHC_M_SENSITIVITY_XY_4_7Ga;
+		sensitivityZ = LSM303DLHC_M_SENSITIVITY_Z_4_7Ga;
+		break;
+	case LSM303DLHC_FS_5_6_GA:
+		sensitivityXY = LSM303DLHC_M_SENSITIVITY_XY_5_6Ga;
+		sensitivityZ = LSM303DLHC_M_SENSITIVITY_Z_5_6Ga;
+		break;
+	case LSM303DLHC_FS_8_1_GA:
+		sensitivityXY = LSM303DLHC_M_SENSITIVITY_XY_8_1Ga;
+		sensitivityZ = LSM303DLHC_M_SENSITIVITY_Z_8_1Ga;
+	}
+
+	for(uint8_t i=0; i<2; i++)
+	{
+		pData[i]=(pnRawData[i] * sensitivityXY);
+	}
+	pData[2] = (pnRawData[2] * sensitivityZ);
+
+	return HAL_OK;
+}
+
+int16_t LSM303DLHC::getTemperature()
+{
+	int16_t pnRawData[3];
+	uint8_t ctrlx[2]={0,0};
+	int8_t buffer[2];
+
+	/* Read the acceleration control register content */
+	ctrlx[0] = readRegisterMag(LSM303DLHC_CTRL_REG4_A);
+
+	if(!(ctrlx[0] & LSM303DLHC_BLE_MSB))
+	{
+		for(uint8_t i=0; i<3; i++)
+		{
+			pnRawData[i]=((int16_t)((uint16_t)buffer[2*i+1] << 8) + buffer[2*i]);
+		}
+	}
+	else /* Big Endian Mode */
+	{
+		for(uint8_t i=0; i<3; i++)
+		{
+			pnRawData[i]=((int16_t)((uint16_t)buffer[2*i] << 8) + buffer[2*i+1]);
+		}
+	}
 }

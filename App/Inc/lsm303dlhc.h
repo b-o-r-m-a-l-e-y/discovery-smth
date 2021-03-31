@@ -52,15 +52,30 @@ public:
 	LSM303DLHC(I2C_HandleTypeDef* hi2c, GPIO_TypeDef* DRDY_GPIO, uint32_t DRDY_pin);
 	~LSM303DLHC();
 
+	/*
+	 * Accelerometer functions
+	 */
+	HAL_StatusTypeDef initAcc();
 	uint8_t readID();
-	HAL_StatusTypeDef writeRegister(uint8_t regAddr, uint8_t reg);
-	uint8_t readRegister(uint8_t regAddr);
+	HAL_StatusTypeDef writeRegisterAcc(uint8_t regAddr, uint8_t reg);
+	uint8_t readRegisterAcc(uint8_t regAddr);
+	HAL_StatusTypeDef getXYZ(int16_t* pData);
+
+	/*
+	 * Magnetometer functions
+	 */
+	HAL_StatusTypeDef initMagnetometer();
+	HAL_StatusTypeDef writeRegisterMag(uint8_t regAddr, uint8_t reg);
+	uint8_t readRegisterMag(uint8_t regAddr);
+	HAL_StatusTypeDef getMagnetomerMeasurements(int16_t* pData);
+	int16_t getTemperature();
 
 private:
 
 	I2C_HandleTypeDef* hi2c;
 	uint32_t       DRDY_pin;
 	GPIO_TypeDef*  DRDY_GPIO;
+	HAL_StatusTypeDef error_status = HAL_OK;
 
 };
 
