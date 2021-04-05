@@ -5,7 +5,7 @@
  *      Author: bormaley
  */
 
-#include <lsm303dlhc.h>
+#include <lsm303agr.h>
 
 
 /******************************************************************************/
@@ -13,63 +13,96 @@
 /******************************************************************************/
 /* Exported constant IO ------------------------------------------------------*/
 #define ACC_I2C_ADDRESS                      0x32
-#define MAG_I2C_ADDRESS                      0x3C
+#define MAG_I2C_ADDRESS                      0x3c
 
 /* Acceleration Registers */
-#define LSM303DLHC_WHO_AM_I_ADDR             0x0F  /* device identification register */
-#define LSM303DLHC_CTRL_REG1_A               0x20  /* Control register 1 acceleration */
-#define LSM303DLHC_CTRL_REG2_A               0x21  /* Control register 2 acceleration */
-#define LSM303DLHC_CTRL_REG3_A               0x22  /* Control register 3 acceleration */
-#define LSM303DLHC_CTRL_REG4_A               0x23  /* Control register 4 acceleration */
-#define LSM303DLHC_CTRL_REG5_A               0x24  /* Control register 5 acceleration */
-#define LSM303DLHC_CTRL_REG6_A               0x25  /* Control register 6 acceleration */
-#define LSM303DLHC_REFERENCE_A               0x26  /* Reference register acceleration */
-#define LSM303DLHC_STATUS_REG_A              0x27  /* Status register acceleration */
-#define LSM303DLHC_OUT_X_L_A                 0x28  /* Output Register X acceleration */
-#define LSM303DLHC_OUT_X_H_A                 0x29  /* Output Register X acceleration */
-#define LSM303DLHC_OUT_Y_L_A                 0x2A  /* Output Register Y acceleration */
-#define LSM303DLHC_OUT_Y_H_A                 0x2B  /* Output Register Y acceleration */
-#define LSM303DLHC_OUT_Z_L_A                 0x2C  /* Output Register Z acceleration */
-#define LSM303DLHC_OUT_Z_H_A                 0x2D  /* Output Register Z acceleration */
-#define LSM303DLHC_FIFO_CTRL_REG_A           0x2E  /* Fifo control Register acceleration */
-#define LSM303DLHC_FIFO_SRC_REG_A            0x2F  /* Fifo src Register acceleration */
+#define LSM303AGR_STATUS_REG_AUX_A          0x07
+#define LSM303AGR_OUT_TEMP_L_A              0x0C
+#define LSM303AGR_OUT_TEMP_H_A              0x0D
+#define LSM303AGR_INT_COUNTER_REG_A         0x0E
+#define LSM303AGR_WHO_AM_I_ADDR             0x0F  /* device identification register */
+#define LSM303AGR_TEMP_CFG_REG_A            0x1F
+#define LSM303AGR_CTRL_REG1_A               0x20  /* Control register 1 acceleration */
+#define LSM303AGR_CTRL_REG2_A               0x21  /* Control register 2 acceleration */
+#define LSM303AGR_CTRL_REG3_A               0x22  /* Control register 3 acceleration */
+#define LSM303AGR_CTRL_REG4_A               0x23  /* Control register 4 acceleration */
+#define LSM303AGR_CTRL_REG5_A               0x24  /* Control register 5 acceleration */
+#define LSM303AGR_CTRL_REG6_A               0x25  /* Control register 6 acceleration */
+#define LSM303AGR_REFERENCE_A               0x26  /* Reference register acceleration */
+#define LSM303AGR_STATUS_REG_A              0x27  /* Status register acceleration */
+#define LSM303AGR_OUT_X_L_A                 0x28  /* Output Register X acceleration */
+#define LSM303AGR_OUT_X_H_A                 0x29  /* Output Register X acceleration */
+#define LSM303AGR_OUT_Y_L_A                 0x2A  /* Output Register Y acceleration */
+#define LSM303AGR_OUT_Y_H_A                 0x2B  /* Output Register Y acceleration */
+#define LSM303AGR_OUT_Z_L_A                 0x2C  /* Output Register Z acceleration */
+#define LSM303AGR_OUT_Z_H_A                 0x2D  /* Output Register Z acceleration */
+#define LSM303AGR_FIFO_CTRL_REG_A           0x2E  /* Fifo control Register acceleration */
+#define LSM303AGR_FIFO_SRC_REG_A            0x2F  /* Fifo src Register acceleration */
 
-#define LSM303DLHC_INT1_CFG_A                0x30  /* Interrupt 1 configuration Register acceleration */
-#define LSM303DLHC_INT1_SOURCE_A             0x31  /* Interrupt 1 source Register acceleration */
-#define LSM303DLHC_INT1_THS_A                0x32  /* Interrupt 1 Threshold register acceleration */
-#define LSM303DLHC_INT1_DURATION_A           0x33  /* Interrupt 1 DURATION register acceleration */
+#define LSM303AGR_INT1_CFG_A                0x30  /* Interrupt 1 configuration Register acceleration */
+#define LSM303AGR_INT1_SRC_A                0x31  /* Interrupt 1 source Register acceleration */
+#define LSM303AGR_INT1_THS_A                0x32  /* Interrupt 1 Threshold register acceleration */
+#define LSM303AGR_INT1_DURATION_A           0x33  /* Interrupt 1 DURATION register acceleration */
 
-#define LSM303DLHC_INT2_CFG_A                0x34  /* Interrupt 2 configuration Register acceleration */
-#define LSM303DLHC_INT2_SOURCE_A             0x35  /* Interrupt 2 source Register acceleration */
-#define LSM303DLHC_INT2_THS_A                0x36  /* Interrupt 2 Threshold register acceleration */
-#define LSM303DLHC_INT2_DURATION_A           0x37  /* Interrupt 2 DURATION register acceleration */
+#define LSM303AGR_INT2_CFG_A                0x34  /* Interrupt 2 configuration Register acceleration */
+#define LSM303AGR_INT2_SRC_A                0x35  /* Interrupt 2 source Register acceleration */
+#define LSM303AGR_INT2_THS_A                0x36  /* Interrupt 2 Threshold register acceleration */
+#define LSM303AGR_INT2_DURATION_A           0x37  /* Interrupt 2 DURATION register acceleration */
 
-#define LSM303DLHC_CLICK_CFG_A               0x38  /* Click configuration Register acceleration */
-#define LSM303DLHC_CLICK_SOURCE_A            0x39  /* Click 2 source Register acceleration */
-#define LSM303DLHC_CLICK_THS_A               0x3A  /* Click 2 Threshold register acceleration */
+#define LSM303AGR_CLICK_CFG_A               0x38  /* Click configuration Register acceleration */
+#define LSM303AGR_CLICK_SRC_A               0x39  /* Click 2 source Register acceleration */
+#define LSM303AGR_CLICK_THS_A               0x3A  /* Click 2 Threshold register acceleration */
 
-#define LSM303DLHC_TIME_LIMIT_A              0x3B  /* Time Limit Register acceleration */
-#define LSM303DLHC_TIME_LATENCY_A            0x3C  /* Time Latency Register acceleration */
-#define LSM303DLHC_TIME_WINDOW_A             0x3D  /* Time window register acceleration */
+#define LSM303AGR_TIME_LIMIT_A              0x3B  /* Time Limit Register acceleration */
+#define LSM303AGR_TIME_LATENCY_A            0x3C  /* Time Latency Register acceleration */
+#define LSM303AGR_TIME_WINDOW_A             0x3D  /* Time window register acceleration */
+#define LSM303AGR_Act_THS_A                 0x3E
+#define LSM303AGR_Act_DUR_A                 0x3F
 
 /* Magnetic field Registers */
-#define LSM303DLHC_CRA_REG_M                 0x00  /* Control register A magnetic field */
-#define LSM303DLHC_CRB_REG_M                 0x01  /* Control register B magnetic field */
-#define LSM303DLHC_MR_REG_M                  0x02  /* Control register MR magnetic field */
-#define LSM303DLHC_OUT_X_H_M                 0x03  /* Output Register X magnetic field */
-#define LSM303DLHC_OUT_X_L_M                 0x04  /* Output Register X magnetic field */
-#define LSM303DLHC_OUT_Z_H_M                 0x05  /* Output Register Z magnetic field */
-#define LSM303DLHC_OUT_Z_L_M                 0x06  /* Output Register Z magnetic field */
-#define LSM303DLHC_OUT_Y_H_M                 0x07  /* Output Register Y magnetic field */
-#define LSM303DLHC_OUT_Y_L_M                 0x08  /* Output Register Y magnetic field */
+#define LSM303AGR_OFFSET_X_REG_L_M          0x45
+#define LSM303AGR_OFFSET_X_REG_H_M          0x46
+#define LSM303AGR_OFFSET_Y_REG_L_M          0x47
+#define LSM303AGR_OFFSET_Y_REG_H_M          0x48
+#define LSM303AGR_OFFSET_Z_REG_L_M          0x49
+#define LSM303AGR_OFFSET_Z_REG_H_M          0x4A
 
-#define LSM303DLHC_SR_REG_M                  0x09  /* Status Register magnetic field */
-#define LSM303DLHC_IRA_REG_M                 0x0A  /* IRA Register magnetic field */
-#define LSM303DLHC_IRB_REG_M                 0x0B  /* IRB Register magnetic field */
-#define LSM303DLHC_IRC_REG_M                 0x0C  /* IRC Register magnetic field */
+#define LSM303AGR_WHO_AM_I                  0x4F
 
-#define LSM303DLHC_TEMP_OUT_H_M              0x31  /* Temperature Register magnetic field */
-#define LSM303DLHC_TEMP_OUT_L_M              0x32  /* Temperature Register magnetic field */
+#define LSM303AGR_CFG_REG_A_M               0x60
+#define LSM303AGR_CFG_REG_B_M               0x61
+#define LSM303AGR_CFG_REG_C_M               0x62
+
+#define LSM303AGR_INT_CTRL_REG_M            0x63
+#define LSM303AGR_INT_SOURCE_REG_M          0x64
+#define LSM303AGR_INT_THS_L_REG_M           0x65
+#define LSM303AGR_INT_THS_H_REG_M           0x66
+
+#define LSM303AGR_STATUS_REG_M              0x67
+#define LSM303AGR_OUTX_L_REG_M              0x68
+#define LSM303AGR_OUTX_H_REG_M              0x69
+#define LSM303AGR_OUTY_L_REG_M              0x6A
+#define LSM303AGR_OUTY_H_REG_M              0x6B
+#define LSM303AGR_OUTZ_L_REG_M              0x6C
+#define LSM303AGR_OUTZ_H_REG_M              0x6D
+
+#define LSM303AGR_CFG_REG_A_M               0x00  /* Control register A magnetic field */
+#define LSM303AGR_CRB_REG_M                 0x01  /* Control register B magnetic field */
+#define LSM303AGR_MR_REG_M                  0x02  /* Control register MR magnetic field */
+#define LSM303AGR_OUT_X_H_M                 0x03  /* Output Register X magnetic field */
+#define LSM303AGR_OUT_X_L_M                 0x04  /* Output Register X magnetic field */
+#define LSM303AGR_OUT_Z_H_M                 0x05  /* Output Register Z magnetic field */
+#define LSM303AGR_OUT_Z_L_M                 0x06  /* Output Register Z magnetic field */
+#define LSM303AGR_OUT_Y_H_M                 0x07  /* Output Register Y magnetic field */
+#define LSM303AGR_OUT_Y_L_M                 0x08  /* Output Register Y magnetic field */
+
+#define LSM303AGR_SR_REG_M                  0x09  /* Status Register magnetic field */
+#define LSM303AGR_IRA_REG_M                 0x0A  /* IRA Register magnetic field */
+#define LSM303AGR_IRB_REG_M                 0x0B  /* IRB Register magnetic field */
+#define LSM303AGR_IRC_REG_M                 0x0C  /* IRC Register magnetic field */
+
+#define LSM303AGR_TEMP_OUT_H_M              0x31  /* Temperature Register magnetic field */
+#define LSM303AGR_TEMP_OUT_L_M              0x32  /* Temperature Register magnetic field */
 
 /******************************************************************************/
 /**************************** END REGISTER MAPPING  ***************************/
@@ -395,20 +428,23 @@ LSM303DLHC::LSM303DLHC(I2C_HandleTypeDef* hi2c, GPIO_TypeDef* DRDY_GPIO, uint32_
 
 HAL_StatusTypeDef LSM303DLHC::initAcc()
 {
-	uint8_t ctrl_reg_1 = 0;
-	ctrl_reg_1 = LSM303DLHC_ODR_50_HZ | LSM303DLHC_X_ENABLE |
-			LSM303DLHC_Y_ENABLE | LSM303DLHC_Z_ENABLE;
+	uint8_t ctrl_reg_1 = LSM303DLHC_NORMAL_MODE | LSM303DLHC_ODR_50_HZ |
+			LSM303DLHC_X_ENABLE | LSM303DLHC_Y_ENABLE | LSM303DLHC_Z_ENABLE;
+
 	error_status = writeRegisterAcc(LSM303DLHC_CTRL_REG1_A, ctrl_reg_1);
+	uint8_t ctrl_reg_4 = LSM303DLHC_HR_ENABLE;
+	error_status = writeRegisterAcc(LSM303DLHC_CTRL_REG4_A, ctrl_reg_4);
 	return error_status;
 }
 
-HAL_StatusTypeDef LSM303DLHC::initMagnetometer()
+HAL_StatusTypeDef LSM303DLHC::initMag()
 {
 	error_status = writeRegisterMag(LSM303DLHC_CRA_REG_M,
-			LSM303DLHC_TEMPSENSOR_ENABLE | LSM303DLHC_ODR_15_HZ);
-	error_status = writeRegisterMag(LSM303DLHC_CRB_REG_M, LSM303DLHC_FS_4_0_GA);
+			LSM303DLHC_TEMPSENSOR_DISABLE | LSM303DLHC_ODR_220_HZ);
+	error_status = writeRegisterMag(LSM303DLHC_CRB_REG_M, LSM303DLHC_FS_4_7_GA);
 	error_status = writeRegisterMag(LSM303DLHC_MR_REG_M, LSM303DLHC_CONTINUOS_CONVERSION);
-	return error_status;
+	HAL_StatusTypeDef status = HAL_I2C_IsDeviceReady(this->hi2c, MAG_I2C_ADDRESS, 2, I2C_TIMEOUT);
+	return status;
 }
 
 uint8_t LSM303DLHC::readID()
@@ -436,7 +472,7 @@ HAL_StatusTypeDef LSM303DLHC::writeRegisterMag(uint8_t regAddr, uint8_t reg)
 uint8_t LSM303DLHC::readRegisterMag(uint8_t regAddr)
 {
 	uint8_t retVal = 0;
-	HAL_I2C_Mem_Read(this->hi2c, MAG_I2C_ADDRESS, regAddr, 1, &retVal, 1, I2C_TIMEOUT);
+	HAL_I2C_Mem_Read(this->hi2c, MAG_I2C_ADDRESS | (1<<0), regAddr, 1, &retVal, 1, I2C_TIMEOUT);
 	return retVal;
 }
 
@@ -502,7 +538,7 @@ HAL_StatusTypeDef LSM303DLHC::getXYZ(int16_t* pData)
 	return HAL_OK;
 }
 
-HAL_StatusTypeDef LSM303DLHC::getMagnetomerMeasurements(int16_t* pData)
+HAL_StatusTypeDef LSM303DLHC::getMagnetometerMeasurements(int16_t* pData)
 {
 	int16_t pnRawData[3];
 	uint8_t ctrlx[2]={0,0};
@@ -514,7 +550,7 @@ HAL_StatusTypeDef LSM303DLHC::getMagnetomerMeasurements(int16_t* pData)
 	ctrlx[0] = readRegisterAcc(LSM303DLHC_CTRL_REG4_A);
 	ctrlx[1] = readRegisterMag(LSM303DLHC_CRB_REG_M);
 
-	/* Read output register X, Y & Z acceleration */
+	/* Read output register X, Y & Z mag */
 	buffer[0] = readRegisterMag(LSM303DLHC_OUT_X_H_M);
 	buffer[1] = readRegisterMag(LSM303DLHC_OUT_X_L_M);
 	buffer[2] = readRegisterMag(LSM303DLHC_OUT_Y_L_M);
@@ -582,25 +618,23 @@ HAL_StatusTypeDef LSM303DLHC::getMagnetomerMeasurements(int16_t* pData)
 
 int16_t LSM303DLHC::getTemperature()
 {
-	int16_t pnRawData[3];
-	uint8_t ctrlx[2]={0,0};
+	int16_t pnRawData;
+	uint8_t ctrlx[2] = {0,0};
 	int8_t buffer[2];
 
 	/* Read the acceleration control register content */
-	ctrlx[0] = readRegisterMag(LSM303DLHC_CTRL_REG4_A);
+	ctrlx[0] = readRegisterAcc(LSM303DLHC_CTRL_REG4_A);
+
+	buffer[0] = readRegisterMag(LSM303DLHC_TEMP_OUT_H_M);
+	buffer[1] = readRegisterMag(LSM303DLHC_TEMP_OUT_L_M);
 
 	if(!(ctrlx[0] & LSM303DLHC_BLE_MSB))
 	{
-		for(uint8_t i=0; i<3; i++)
-		{
-			pnRawData[i]=((int16_t)((uint16_t)buffer[2*i+1] << 8) + buffer[2*i]);
-		}
+		pnRawData=((int16_t)((uint16_t)buffer[1] << 8) + buffer[0]);
 	}
 	else /* Big Endian Mode */
 	{
-		for(uint8_t i=0; i<3; i++)
-		{
-			pnRawData[i]=((int16_t)((uint16_t)buffer[2*i] << 8) + buffer[2*i+1]);
-		}
+		pnRawData=((int16_t)((uint16_t)buffer[0] << 8) + buffer[1]);
 	}
+	return pnRawData;
 }

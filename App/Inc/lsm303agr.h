@@ -64,10 +64,10 @@ public:
 	/*
 	 * Magnetometer functions
 	 */
-	HAL_StatusTypeDef initMagnetometer();
+	HAL_StatusTypeDef initMag();
 	HAL_StatusTypeDef writeRegisterMag(uint8_t regAddr, uint8_t reg);
 	uint8_t readRegisterMag(uint8_t regAddr);
-	HAL_StatusTypeDef getMagnetomerMeasurements(int16_t* pData);
+	HAL_StatusTypeDef getMagnetometerMeasurements(int16_t* pData);
 	int16_t getTemperature();
 
 private:

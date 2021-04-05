@@ -8,7 +8,7 @@
 #ifndef APP_H_
 #define APP_H_
 
-#include "lsm303dlhc.h"
+#include "lsm303agr.h"
 #include "main.h"
 
 extern "C" void main_app_wrp();

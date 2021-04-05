@@ -23,22 +23,25 @@ MainApp::MainApp() :
 
 void MainApp::run()
 {
-	uint8_t val = lsm303dhlc.readID();
-	if (val == 0x32) {
-		CDC_Transmit_FS((uint8_t*)"Who am I test correct", 20);
-	}
-	else {
-		CDC_Transmit_FS((uint8_t*)"Incorrect who am I", 20);
-	}
+	osDelay(100);
 	lsm303dhlc.initAcc();
-	lsm303dhlc.initMagnetometer();
+	lsm303dhlc.initMag();
 	while(1) {
-		int16_t data[3];
-		lsm303dhlc.getMagnetomerMeasurements(data);
+		int16_t dataMag[3];
+		lsm303dhlc.getMagnetometerMeasurements(dataMag);
 		char buffer[50];
-		uint8_t n = sprintf(buffer, "X: %d\nY: %d\nZ: %d\n", data[0], data[1], data[2]);
+		uint8_t n = sprintf(buffer, "Mag\n X: %d\nY: %d\nZ: %d\n", dataMag[0], dataMag[1], dataMag[2]);
 		CDC_Transmit_FS((uint8_t*)buffer, n);
-		osDelay(250);
+
+		int16_t dataAcc[3];
+		lsm303dhlc.getXYZ(dataAcc);
+		n = sprintf(buffer, "Acc\n X: %d\nY: %d\nZ: %d\n", dataAcc[0], dataAcc[1], dataAcc[2]);
+		CDC_Transmit_FS((uint8_t*)buffer, n);
+
+		//int16_t temp = lsm303dhlc.getTemperature();
+		//n = sprintf(buffer, "Temp: %d\n", temp);
+		//CDC_Transmit_FS((uint8_t*)buffer, n);
+		osDelay(500);
 		HAL_GPIO_TogglePin(LD4_GPIO_Port, LD4_Pin);
 	}
 }
