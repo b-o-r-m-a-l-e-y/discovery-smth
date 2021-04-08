@@ -13,14 +13,14 @@
 /******************************************************************************/
 /* Exported constant IO ------------------------------------------------------*/
 #define ACC_I2C_ADDRESS                      0x32
-#define MAG_I2C_ADDRESS                      0x3c
+#define MAG_I2C_ADDRESS                      0x3C
 
 /* Acceleration Registers */
 #define LSM303AGR_STATUS_REG_AUX_A          0x07
 #define LSM303AGR_OUT_TEMP_L_A              0x0C
 #define LSM303AGR_OUT_TEMP_H_A              0x0D
 #define LSM303AGR_INT_COUNTER_REG_A         0x0E
-#define LSM303AGR_WHO_AM_I_ADDR             0x0F  /* device identification register */
+#define LSM303AGR_WHO_AM_I_A                0x0F  /* device identification register */
 #define LSM303AGR_TEMP_CFG_REG_A            0x1F
 #define LSM303AGR_CTRL_REG1_A               0x20  /* Control register 1 acceleration */
 #define LSM303AGR_CTRL_REG2_A               0x21  /* Control register 2 acceleration */
@@ -67,7 +67,7 @@
 #define LSM303AGR_OFFSET_Z_REG_L_M          0x49
 #define LSM303AGR_OFFSET_Z_REG_H_M          0x4A
 
-#define LSM303AGR_WHO_AM_I                  0x4F
+#define LSM303AGR_WHO_AM_I_M                0x4F
 
 #define LSM303AGR_CFG_REG_A_M               0x60
 #define LSM303AGR_CFG_REG_B_M               0x61
@@ -85,24 +85,6 @@
 #define LSM303AGR_OUTY_H_REG_M              0x6B
 #define LSM303AGR_OUTZ_L_REG_M              0x6C
 #define LSM303AGR_OUTZ_H_REG_M              0x6D
-
-#define LSM303AGR_CFG_REG_A_M               0x00  /* Control register A magnetic field */
-#define LSM303AGR_CRB_REG_M                 0x01  /* Control register B magnetic field */
-#define LSM303AGR_MR_REG_M                  0x02  /* Control register MR magnetic field */
-#define LSM303AGR_OUT_X_H_M                 0x03  /* Output Register X magnetic field */
-#define LSM303AGR_OUT_X_L_M                 0x04  /* Output Register X magnetic field */
-#define LSM303AGR_OUT_Z_H_M                 0x05  /* Output Register Z magnetic field */
-#define LSM303AGR_OUT_Z_L_M                 0x06  /* Output Register Z magnetic field */
-#define LSM303AGR_OUT_Y_H_M                 0x07  /* Output Register Y magnetic field */
-#define LSM303AGR_OUT_Y_L_M                 0x08  /* Output Register Y magnetic field */
-
-#define LSM303AGR_SR_REG_M                  0x09  /* Status Register magnetic field */
-#define LSM303AGR_IRA_REG_M                 0x0A  /* IRA Register magnetic field */
-#define LSM303AGR_IRB_REG_M                 0x0B  /* IRB Register magnetic field */
-#define LSM303AGR_IRC_REG_M                 0x0C  /* IRC Register magnetic field */
-
-#define LSM303AGR_TEMP_OUT_H_M              0x31  /* Temperature Register magnetic field */
-#define LSM303AGR_TEMP_OUT_L_M              0x32  /* Temperature Register magnetic field */
 
 /******************************************************************************/
 /**************************** END REGISTER MAPPING  ***************************/
@@ -345,6 +327,16 @@
   * @}
   */
 
+#define LSM303AGR_COMP_TEMP_EN              ((uint8_t)0x80)
+#define LSM303AGR_REBOOT_MEM                ((uint8_t)0x40)
+
+#define LSM303AGR_ODR_10_HZ                 ((uint8_t)0x00)
+#define LSM303AGR_ODR_20_HZ                 ((uint8_t)0x04)
+#define LSM303AGR_ODR_50_HZ                 ((uint8_t)0x08)
+#define LSM303AGR_ODR_100_HZ                ((uint8_t)0x0C)
+
+#define LSM303AGR_MODE_CONTINUOUS           (uint8_t)0x00)
+
 /** @defgroup Mag_Data_Rate
   * @{
   */
@@ -428,28 +420,31 @@ LSM303DLHC::LSM303DLHC(I2C_HandleTypeDef* hi2c, GPIO_TypeDef* DRDY_GPIO, uint32_
 
 HAL_StatusTypeDef LSM303DLHC::initAcc()
 {
-	uint8_t ctrl_reg_1 = LSM303DLHC_NORMAL_MODE | LSM303DLHC_ODR_50_HZ |
+	uint8_t ctrl_reg_1 = LSM303DLHC_ODR_100_HZ |
 			LSM303DLHC_X_ENABLE | LSM303DLHC_Y_ENABLE | LSM303DLHC_Z_ENABLE;
+	error_status = writeRegisterAcc(LSM303AGR_CTRL_REG1_A, ctrl_reg_1);
 
-	error_status = writeRegisterAcc(LSM303DLHC_CTRL_REG1_A, ctrl_reg_1);
-	uint8_t ctrl_reg_4 = LSM303DLHC_HR_ENABLE;
-	error_status = writeRegisterAcc(LSM303DLHC_CTRL_REG4_A, ctrl_reg_4);
+	//uint8_t ctrl_reg_4 = LSM303DLHC_HR_ENABLE;
+	//error_status = writeRegisterAcc(LSM303AGR_CTRL_REG4_A, ctrl_reg_4);
 	return error_status;
 }
 
 HAL_StatusTypeDef LSM303DLHC::initMag()
 {
-	error_status = writeRegisterMag(LSM303DLHC_CRA_REG_M,
-			LSM303DLHC_TEMPSENSOR_DISABLE | LSM303DLHC_ODR_220_HZ);
-	error_status = writeRegisterMag(LSM303DLHC_CRB_REG_M, LSM303DLHC_FS_4_7_GA);
-	error_status = writeRegisterMag(LSM303DLHC_MR_REG_M, LSM303DLHC_CONTINUOS_CONVERSION);
-	HAL_StatusTypeDef status = HAL_I2C_IsDeviceReady(this->hi2c, MAG_I2C_ADDRESS, 2, I2C_TIMEOUT);
-	return status;
+	error_status = writeRegisterMag(LSM303AGR_CFG_REG_A_M, LSM303AGR_ODR_50_HZ);
+
+	error_status = writeRegisterMag(LSM303AGR_CFG_REG_C_M, 0x01);
+	return error_status;
 }
 
-uint8_t LSM303DLHC::readID()
+uint8_t LSM303DLHC::readAccID()
 {
-	return readRegisterAcc(LSM303DLHC_WHO_AM_I_ADDR) & ~(1<<0);
+	return readRegisterAcc(LSM303AGR_WHO_AM_I_A) & ~(1<<0);
+}
+
+uint8_t LSM303DLHC::readMagID()
+{
+	return readRegisterMag(LSM303AGR_WHO_AM_I_M) & ~(1<<0);
 }
 
 HAL_StatusTypeDef LSM303DLHC::writeRegisterAcc(uint8_t regAddr, uint8_t reg)
@@ -476,63 +471,36 @@ uint8_t LSM303DLHC::readRegisterMag(uint8_t regAddr)
 	return retVal;
 }
 
-HAL_StatusTypeDef LSM303DLHC::getXYZ(int16_t* pData)
+HAL_StatusTypeDef LSM303DLHC::getAccData(int16_t* pData)
 {
-	int16_t pnRawData[3];
-	uint8_t ctrlx[2]={0,0};
-	int8_t buffer[6];
-	uint8_t sensitivity = LSM303DLHC_ACC_SENSITIVITY_2G;
+	uint8_t ctrlReg4 = 0;
+	uint8_t buffer[6];
 
 	/* Read the acceleration control register content */
-	ctrlx[0] = readRegisterAcc(LSM303DLHC_CTRL_REG4_A);
-	ctrlx[1] = readRegisterAcc(LSM303DLHC_CTRL_REG5_A);
+	ctrlReg4 = readRegisterAcc(LSM303AGR_CTRL_REG4_A);
 
 	/* Read output register X, Y & Z acceleration */
-	buffer[0] = readRegisterAcc(LSM303DLHC_OUT_X_L_A);
-	buffer[1] = readRegisterAcc(LSM303DLHC_OUT_X_H_A);
-	buffer[2] = readRegisterAcc(LSM303DLHC_OUT_Y_L_A);
-	buffer[3] = readRegisterAcc(LSM303DLHC_OUT_Y_H_A);
-	buffer[4] = readRegisterAcc(LSM303DLHC_OUT_Z_L_A);
-	buffer[5] = readRegisterAcc(LSM303DLHC_OUT_Z_H_A);
+	buffer[0] = readRegisterAcc(LSM303AGR_OUT_X_L_A);
+	buffer[1] = readRegisterAcc(LSM303AGR_OUT_X_H_A);
+	buffer[2] = readRegisterAcc(LSM303AGR_OUT_Y_L_A);
+	buffer[3] = readRegisterAcc(LSM303AGR_OUT_Y_H_A);
+	buffer[4] = readRegisterAcc(LSM303AGR_OUT_Z_L_A);
+	buffer[5] = readRegisterAcc(LSM303AGR_OUT_Z_H_A);
 
 	/* Check in the control register4 the data alignment*/
-	if(!(ctrlx[0] & LSM303DLHC_BLE_MSB))
+	if(!(ctrlReg4 & LSM303DLHC_BLE_MSB))
 	{
 		for(uint8_t i=0; i<3; i++)
 		{
-			pnRawData[i]=((int16_t)((uint16_t)buffer[2*i+1] << 8) + buffer[2*i]);
+			pData[i]=((int16_t)((uint16_t)buffer[2*i+1] << 8) + buffer[2*i]);
 		}
 	}
 	else /* Big Endian Mode */
 	{
 		for(uint8_t i=0; i<3; i++)
 		{
-			pnRawData[i]=((int16_t)((uint16_t)buffer[2*i] << 8) + buffer[2*i+1]);
+			pData[i]=((int16_t)((uint16_t)buffer[2*i] << 8) + buffer[2*i+1]);
 		}
-	}
-
-	/* Normal mode */
-	/* Switch the sensitivity value set in the CRTL4 */
-	switch(ctrlx[0] & LSM303DLHC_FULLSCALE_16G)
-	{
-	case LSM303DLHC_FULLSCALE_2G:
-		sensitivity = LSM303DLHC_ACC_SENSITIVITY_2G;
-		break;
-	case LSM303DLHC_FULLSCALE_4G:
-		sensitivity = LSM303DLHC_ACC_SENSITIVITY_4G;
-		break;
-	case LSM303DLHC_FULLSCALE_8G:
-		sensitivity = LSM303DLHC_ACC_SENSITIVITY_8G;
-		break;
-	case LSM303DLHC_FULLSCALE_16G:
-		sensitivity = LSM303DLHC_ACC_SENSITIVITY_16G;
-		break;
-	}
-
-	/* Obtain the mg value for the three axis */
-	for(uint8_t i=0; i<3; i++)
-	{
-		pData[i]=(pnRawData[i] * sensitivity);
 	}
 
 	return HAL_OK;
@@ -540,78 +508,35 @@ HAL_StatusTypeDef LSM303DLHC::getXYZ(int16_t* pData)
 
 HAL_StatusTypeDef LSM303DLHC::getMagnetometerMeasurements(int16_t* pData)
 {
-	int16_t pnRawData[3];
-	uint8_t ctrlx[2]={0,0};
 	int8_t buffer[6];
-	uint16_t sensitivityXY = LSM303DLHC_M_SENSITIVITY_XY_1_3Ga;
-	uint16_t sensitivityZ  = LSM303DLHC_M_SENSITIVITY_Z_1_3Ga;
+	uint8_t ctrlReg4 = 0;
 
 	/* Read the acceleration control register content */
-	ctrlx[0] = readRegisterAcc(LSM303DLHC_CTRL_REG4_A);
-	ctrlx[1] = readRegisterMag(LSM303DLHC_CRB_REG_M);
+	ctrlReg4 = readRegisterAcc(LSM303AGR_CTRL_REG4_A);
 
 	/* Read output register X, Y & Z mag */
-	buffer[0] = readRegisterMag(LSM303DLHC_OUT_X_H_M);
-	buffer[1] = readRegisterMag(LSM303DLHC_OUT_X_L_M);
-	buffer[2] = readRegisterMag(LSM303DLHC_OUT_Y_L_M);
-	buffer[3] = readRegisterMag(LSM303DLHC_OUT_Y_H_M);
-	buffer[4] = readRegisterMag(LSM303DLHC_OUT_Z_L_M);
-	buffer[5] = readRegisterMag(LSM303DLHC_OUT_Z_H_M);
+	buffer[0] = readRegisterMag(LSM303AGR_OUTX_H_REG_M);
+	buffer[1] = readRegisterMag(LSM303AGR_OUTX_L_REG_M);
+	buffer[2] = readRegisterMag(LSM303AGR_OUTY_H_REG_M);
+	buffer[3] = readRegisterMag(LSM303AGR_OUTY_L_REG_M);
+	buffer[4] = readRegisterMag(LSM303AGR_OUTZ_H_REG_M);
+	buffer[5] = readRegisterMag(LSM303AGR_OUTZ_L_REG_M);
 
 	/* Check in the control register4 the data alignment*/
-	if(!(ctrlx[0] & LSM303DLHC_BLE_MSB))
+	if(!(ctrlReg4 & LSM303DLHC_BLE_MSB))
 	{
 		for(uint8_t i=0; i<3; i++)
 		{
-			pnRawData[i]=((int16_t)((uint16_t)buffer[2*i+1] << 8) + buffer[2*i]);
+			pData[i]=((int16_t)((uint16_t)buffer[2*i+1] << 8) + buffer[2*i]);
 		}
 	}
 	else /* Big Endian Mode */
 	{
 		for(uint8_t i=0; i<3; i++)
 		{
-			pnRawData[i]=((int16_t)((uint16_t)buffer[2*i] << 8) + buffer[2*i+1]);
+			pData[i]=((int16_t)((uint16_t)buffer[2*i] << 8) + buffer[2*i+1]);
 		}
 	}
-
-	/* Normal mode */
-	/* Switch the sensitivity value set in the CRTL4 */
-	switch(ctrlx[1] & LSM303DLHC_FS_8_1_GA)
-	{
-	case LSM303DLHC_FS_1_3_GA:
-		sensitivityXY = LSM303DLHC_M_SENSITIVITY_XY_1_3Ga;
-		sensitivityZ = LSM303DLHC_M_SENSITIVITY_Z_1_3Ga;
-		break;
-	case LSM303DLHC_FS_1_9_GA:
-		sensitivityXY = LSM303DLHC_M_SENSITIVITY_XY_1_9Ga;
-		sensitivityZ = LSM303DLHC_M_SENSITIVITY_Z_1_9Ga;
-		break;
-	case LSM303DLHC_FS_2_5_GA:
-		sensitivityXY = LSM303DLHC_M_SENSITIVITY_XY_2_5Ga;
-		sensitivityZ = LSM303DLHC_M_SENSITIVITY_Z_2_5Ga;
-		break;
-	case LSM303DLHC_FS_4_0_GA:
-		sensitivityXY = LSM303DLHC_M_SENSITIVITY_XY_4Ga;
-		sensitivityZ = LSM303DLHC_M_SENSITIVITY_Z_4Ga;
-		break;
-	case LSM303DLHC_FS_4_7_GA:
-		sensitivityXY = LSM303DLHC_M_SENSITIVITY_XY_4_7Ga;
-		sensitivityZ = LSM303DLHC_M_SENSITIVITY_Z_4_7Ga;
-		break;
-	case LSM303DLHC_FS_5_6_GA:
-		sensitivityXY = LSM303DLHC_M_SENSITIVITY_XY_5_6Ga;
-		sensitivityZ = LSM303DLHC_M_SENSITIVITY_Z_5_6Ga;
-		break;
-	case LSM303DLHC_FS_8_1_GA:
-		sensitivityXY = LSM303DLHC_M_SENSITIVITY_XY_8_1Ga;
-		sensitivityZ = LSM303DLHC_M_SENSITIVITY_Z_8_1Ga;
-	}
-
-	for(uint8_t i=0; i<2; i++)
-	{
-		pData[i]=(pnRawData[i] * sensitivityXY);
-	}
-	pData[2] = (pnRawData[2] * sensitivityZ);
 
 	return HAL_OK;
 }
@@ -623,10 +548,10 @@ int16_t LSM303DLHC::getTemperature()
 	int8_t buffer[2];
 
 	/* Read the acceleration control register content */
-	ctrlx[0] = readRegisterAcc(LSM303DLHC_CTRL_REG4_A);
+	ctrlx[0] = readRegisterAcc(LSM303AGR_CTRL_REG4_A);
 
-	buffer[0] = readRegisterMag(LSM303DLHC_TEMP_OUT_H_M);
-	buffer[1] = readRegisterMag(LSM303DLHC_TEMP_OUT_L_M);
+	buffer[0] = readRegisterAcc(LSM303AGR_OUT_TEMP_H_A);
+	buffer[1] = readRegisterAcc(LSM303AGR_OUT_TEMP_L_A);
 
 	if(!(ctrlx[0] & LSM303DLHC_BLE_MSB))
 	{

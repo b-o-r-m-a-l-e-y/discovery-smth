@@ -56,15 +56,17 @@ public:
 	 * Accelerometer functions
 	 */
 	HAL_StatusTypeDef initAcc();
-	uint8_t readID();
+	uint8_t readAccID();
 	HAL_StatusTypeDef writeRegisterAcc(uint8_t regAddr, uint8_t reg);
 	uint8_t readRegisterAcc(uint8_t regAddr);
-	HAL_StatusTypeDef getXYZ(int16_t* pData);
+	HAL_StatusTypeDef getAccData(int16_t* pData);
+	HAL_StatusTypeDef enableTemperatureSensor();
 
 	/*
 	 * Magnetometer functions
 	 */
 	HAL_StatusTypeDef initMag();
+	uint8_t readMagID();
 	HAL_StatusTypeDef writeRegisterMag(uint8_t regAddr, uint8_t reg);
 	uint8_t readRegisterMag(uint8_t regAddr);
 	HAL_StatusTypeDef getMagnetometerMeasurements(int16_t* pData);

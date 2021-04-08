@@ -29,19 +29,16 @@ void MainApp::run()
 	while(1) {
 		int16_t dataMag[3];
 		lsm303dhlc.getMagnetometerMeasurements(dataMag);
-		char buffer[50];
-		uint8_t n = sprintf(buffer, "Mag\n X: %d\nY: %d\nZ: %d\n", dataMag[0], dataMag[1], dataMag[2]);
+		char buffer[100];
+		uint8_t n = sprintf(buffer, "MagX=%d MagY=%d MagZ=%d ", dataMag[0], dataMag[1], dataMag[2]);
 		CDC_Transmit_FS((uint8_t*)buffer, n);
 
 		int16_t dataAcc[3];
-		lsm303dhlc.getXYZ(dataAcc);
-		n = sprintf(buffer, "Acc\n X: %d\nY: %d\nZ: %d\n", dataAcc[0], dataAcc[1], dataAcc[2]);
-		CDC_Transmit_FS((uint8_t*)buffer, n);
-
-		//int16_t temp = lsm303dhlc.getTemperature();
-		//n = sprintf(buffer, "Temp: %d\n", temp);
+		lsm303dhlc.getAccData(dataAcc);
+		n = sprintf(buffer, "AccX=%d AccY=%d AccZ=%d ", dataAcc[0], dataAcc[1], dataAcc[2]);
 		//CDC_Transmit_FS((uint8_t*)buffer, n);
-		osDelay(500);
+
+		osDelay(100);
 		HAL_GPIO_TogglePin(LD4_GPIO_Port, LD4_Pin);
 	}
 }
