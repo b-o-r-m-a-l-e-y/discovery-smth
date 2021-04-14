@@ -15,35 +15,39 @@ class SerialPlotter:
         self.device = '/dev/ttyACM0'
         self.serialConnection = serial.Serial(self.device)
         self.allData = {
-                        'MagX' : [0],
-                        'MagY' : [0],
-                        'MagZ' : [0],
-                        'AccX' : [0],
-                        'AccY' : [0],
-                        'AccZ' : [0]
+                        'MagX' : collections.deque([0]*MAX_DEPTH, maxlen=MAX_DEPTH),
+                        'MagY' : collections.deque([0]*MAX_DEPTH, maxlen=MAX_DEPTH),
+                        'MagZ' : collections.deque([0]*MAX_DEPTH, maxlen=MAX_DEPTH),
+                        'AccX' : collections.deque([0]*MAX_DEPTH, maxlen=MAX_DEPTH),
+                        'AccY' : collections.deque([0]*MAX_DEPTH, maxlen=MAX_DEPTH),
+                        'AccZ' : collections.deque([0]*MAX_DEPTH, maxlen=MAX_DEPTH),
         }
         self.x = np.linspace(0, MAX_DEPTH, MAX_DEPTH)
-        self.y1 = collections.deque([0]*MAX_DEPTH, maxlen=MAX_DEPTH)
-        self.y2 = collections.deque([0]*MAX_DEPTH, maxlen=MAX_DEPTH)
 
         self.fig = plt.figure()
         self.ax = self.fig.add_subplot(1,1,1)    
-        self.line, = self.ax.plot(self.x, self.y1)
-        self.line2, = self.ax.plot(self.x, self.y2)
-        plt.ylim(-2**15, 2**15)
+        self.line, = self.ax.plot(self.x, self.allData['MagX'], label='MagX')
+        self.line2, = self.ax.plot(self.x, self.allData['MagY'], label='MagY')
+        self.line3, = self.ax.plot(self.x, self.allData['MagZ'], label='MagZ')
+        plt.ylim(-60, 60)
+        plt.legend()
+        plt.ylabel('Gauss')
+        plt.tight_layout()
+        plt.grid()
 
         self.thread = threading.Thread(target = self._in_background)
         self.ani = animation.FuncAnimation(self.fig, self._animate, interval=50)
         self.ani2 = animation.FuncAnimation(self.fig, self._animate2, interval=50)
-        self.ctr = 1
+        self.ani3 = animation.FuncAnimation(self.fig, self._animate3, interval=50)
 
     def _animate(self, i):
-        self.line.set_ydata(self.y1)
-        #plt.ylim(min(self.y1), max(self.y1))
+        self.line.set_ydata(self.allData['MagX'])
     
     def _animate2(self, i):
-        self.line2.set_ydata(self.y2)
-        #plt.ylim(min(self.y2), max(self.y2))
+        self.line2.set_ydata(self.allData['MagY'])
+
+    def _animate3(self, i):
+        self.line3.set_ydata(self.allData['MagZ'])
 
     def _in_background(self):
         while True:
@@ -55,12 +59,12 @@ class SerialPlotter:
                         prepared = line.decode('utf-8').strip(' ').split(' ')
                         for elem in prepared:
                             splitted = elem.split('=')
-                            self.allData[splitted[0]].append(int(splitted[1]))
-                        for key in self.allData:
-                            self.allData[key] = self.allData[key][-MAX_DEPTH:]
-                        np.append(self.x,time.time())
-                        self.y1.append(self.allData['MagX'][-1])
-                        self.y2.append(self.allData['MagY'][-1])
+                            if splitted[0] == 'MagX' or splitted[0] == 'MagY' or splitted[0] == 'MagZ':
+                                self.allData[splitted[0]].append(int(splitted[1])*1.5/1000)
+                            else:
+                                self.allData[splitted[0]].append(int(splitted[1]))
+                        # for key in self.allData:
+                        #     self.allData[key] = self.allData[key][-MAX_DEPTH:]
                         # self.y = self.y[-MAX_DEPTH:]
                         # self.x.append(self.ctr)
                         # self.x = self.x[-MAX_DEPTH:]
