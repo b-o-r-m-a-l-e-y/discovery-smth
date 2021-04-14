@@ -1,7 +1,7 @@
 import collections
 import serial
 import threading
-import time    
+import time
 
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
@@ -22,18 +22,28 @@ class SerialPlotter:
                         'AccY' : [0],
                         'AccZ' : [0]
         }
-        self.x = np.linspace(-30, 0, MAX_DEPTH)
-        self.y = collections.deque([0]*MAX_DEPTH, maxlen=MAX_DEPTH)
+        self.x = np.linspace(0, MAX_DEPTH, MAX_DEPTH)
+        self.y1 = collections.deque([0]*MAX_DEPTH, maxlen=MAX_DEPTH)
+        self.y2 = collections.deque([0]*MAX_DEPTH, maxlen=MAX_DEPTH)
+
         self.fig = plt.figure()
         self.ax = self.fig.add_subplot(1,1,1)    
-        self.line, = self.ax.plot(self.x, self.y)
+        self.line, = self.ax.plot(self.x, self.y1)
+        self.line2, = self.ax.plot(self.x, self.y2)
+        plt.ylim(-2**15, 2**15)
 
         self.thread = threading.Thread(target = self._in_background)
         self.ani = animation.FuncAnimation(self.fig, self._animate, interval=50)
+        self.ani2 = animation.FuncAnimation(self.fig, self._animate2, interval=50)
+        self.ctr = 1
 
     def _animate(self, i):
-        self.line.set_ydata(self.y)
-        plt.ylim(min(self.y), max(self.y))
+        self.line.set_ydata(self.y1)
+        #plt.ylim(min(self.y1), max(self.y1))
+    
+    def _animate2(self, i):
+        self.line2.set_ydata(self.y2)
+        #plt.ylim(min(self.y2), max(self.y2))
 
     def _in_background(self):
         while True:
@@ -49,7 +59,12 @@ class SerialPlotter:
                         for key in self.allData:
                             self.allData[key] = self.allData[key][-MAX_DEPTH:]
                         np.append(self.x,time.time())
-                        self.y.append(self.allData['MagX'][-1])
+                        self.y1.append(self.allData['MagX'][-1])
+                        self.y2.append(self.allData['MagY'][-1])
+                        # self.y = self.y[-MAX_DEPTH:]
+                        # self.x.append(self.ctr)
+                        # self.x = self.x[-MAX_DEPTH:]
+                        # self.ctr += 1
                         #print(allData['MagX'][-1])
                 except Exception as e:
                     print(e)
