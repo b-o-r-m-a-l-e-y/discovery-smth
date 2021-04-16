@@ -488,7 +488,7 @@ HAL_StatusTypeDef LSM303DLHC::getAccData(int16_t* pData)
 	buffer[5] = readRegisterAcc(LSM303AGR_OUT_Z_H_A);
 
 	/* Check in the control register4 the data alignment*/
-	if(!(ctrlReg4 & LSM303DLHC_BLE_MSB))
+	if((ctrlReg4 & LSM303DLHC_BLE_MSB))
 	{
 		for(uint8_t i=0; i<3; i++)
 		{
@@ -515,15 +515,19 @@ HAL_StatusTypeDef LSM303DLHC::getMagnetometerMeasurements(int16_t* pData)
 	ctrlReg4 = readRegisterAcc(LSM303AGR_CTRL_REG4_A);
 
 	/* Read output register X, Y & Z mag */
-	buffer[0] = readRegisterMag(LSM303AGR_OUTX_H_REG_M);
-	buffer[1] = readRegisterMag(LSM303AGR_OUTX_L_REG_M);
-	buffer[2] = readRegisterMag(LSM303AGR_OUTY_H_REG_M);
-	buffer[3] = readRegisterMag(LSM303AGR_OUTY_L_REG_M);
-	buffer[4] = readRegisterMag(LSM303AGR_OUTZ_H_REG_M);
-	buffer[5] = readRegisterMag(LSM303AGR_OUTZ_L_REG_M);
+//	buffer[0] = readRegisterMag(LSM303AGR_OUTX_H_REG_M);
+//	buffer[1] = readRegisterMag(LSM303AGR_OUTX_L_REG_M);
+//	buffer[2] = readRegisterMag(LSM303AGR_OUTY_H_REG_M);
+//	buffer[3] = readRegisterMag(LSM303AGR_OUTY_L_REG_M);
+//	buffer[4] = readRegisterMag(LSM303AGR_OUTZ_H_REG_M);
+//	buffer[5] = readRegisterMag(LSM303AGR_OUTZ_L_REG_M);
+	buffer[0] = LSM303AGR_OUTX_H_REG_M;
+	HAL_I2C_Master_Transmit(hi2c, MAG_I2C_ADDRESS, reinterpret_cast<uint8_t*>(buffer), 1, 0xff);
+
+	HAL_I2C_Master_Receive(hi2c, MAG_I2C_ADDRESS, reinterpret_cast<uint8_t*>(buffer), 6, 0xff);
 
 	/* Check in the control register4 the data alignment*/
-	if(!(ctrlReg4 & LSM303DLHC_BLE_MSB))
+	if((ctrlReg4 & LSM303DLHC_BLE_MSB))
 	{
 		for(uint8_t i=0; i<3; i++)
 		{

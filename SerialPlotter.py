@@ -29,9 +29,9 @@ class SerialPlotter:
         self.line, = self.ax.plot(self.x, self.allData['MagX'], label='MagX')
         self.line2, = self.ax.plot(self.x, self.allData['MagY'], label='MagY')
         self.line3, = self.ax.plot(self.x, self.allData['MagZ'], label='MagZ')
-        plt.ylim(-60, 60)
+        plt.ylim(-1000, 1000)
         plt.legend()
-        plt.ylabel('Gauss')
+        #plt.ylabel('мкТл')
         plt.tight_layout()
         plt.grid()
 
@@ -60,16 +60,9 @@ class SerialPlotter:
                         for elem in prepared:
                             splitted = elem.split('=')
                             if splitted[0] == 'MagX' or splitted[0] == 'MagY' or splitted[0] == 'MagZ':
-                                self.allData[splitted[0]].append(int(splitted[1])*1.5/1000)
+                                self.allData[splitted[0]].append(int(splitted[1]))
                             else:
                                 self.allData[splitted[0]].append(int(splitted[1]))
-                        # for key in self.allData:
-                        #     self.allData[key] = self.allData[key][-MAX_DEPTH:]
-                        # self.y = self.y[-MAX_DEPTH:]
-                        # self.x.append(self.ctr)
-                        # self.x = self.x[-MAX_DEPTH:]
-                        # self.ctr += 1
-                        #print(allData['MagX'][-1])
                 except Exception as e:
                     print(e)
             else:

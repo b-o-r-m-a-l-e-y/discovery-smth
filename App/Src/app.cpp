@@ -30,7 +30,7 @@ void MainApp::run()
 		int16_t dataMag[3];
 		lsm303dhlc.getMagnetometerMeasurements(dataMag);
 		char buffer[100];
-		uint8_t n = sprintf(buffer, "MagX=%d MagY=%d MagZ=%d ", dataMag[0], dataMag[1], dataMag[2]);
+		uint8_t n = sprintf(buffer, "MagX=%i MagY=%i MagZ=%i ", dataMag[0], dataMag[1], dataMag[2]);
 		CDC_Transmit_FS((uint8_t*)buffer, n);
 
 		int16_t dataAcc[3];
@@ -38,7 +38,7 @@ void MainApp::run()
 		n = sprintf(buffer, "AccX=%d AccY=%d AccZ=%d ", dataAcc[0], dataAcc[1], dataAcc[2]);
 		//CDC_Transmit_FS((uint8_t*)buffer, n);
 
-		osDelay(100);
+		osDelay(10);
 		HAL_GPIO_TogglePin(LD4_GPIO_Port, LD4_Pin);
 	}
 }
