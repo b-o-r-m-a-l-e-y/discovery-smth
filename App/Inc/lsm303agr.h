@@ -69,7 +69,7 @@ public:
 	uint8_t readMagID();
 	HAL_StatusTypeDef writeRegisterMag(uint8_t regAddr, uint8_t reg);
 	uint8_t readRegisterMag(uint8_t regAddr);
-	HAL_StatusTypeDef getMagnetometerMeasurements(int16_t* pData);
+	HAL_StatusTypeDef getMagData(int16_t* pData);
 	int16_t getTemperature();
 
 private:

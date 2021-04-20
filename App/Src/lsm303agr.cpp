@@ -424,8 +424,16 @@ HAL_StatusTypeDef LSM303DLHC::initAcc()
 			LSM303DLHC_X_ENABLE | LSM303DLHC_Y_ENABLE | LSM303DLHC_Z_ENABLE;
 	error_status = writeRegisterAcc(LSM303AGR_CTRL_REG1_A, ctrl_reg_1);
 
-	//uint8_t ctrl_reg_4 = LSM303DLHC_HR_ENABLE;
-	//error_status = writeRegisterAcc(LSM303AGR_CTRL_REG4_A, ctrl_reg_4);
+	uint8_t ctrl_reg_4 = 0x38;
+	error_status = writeRegisterAcc(LSM303AGR_CTRL_REG4_A, ctrl_reg_4);
+
+//	uint8_t ctrl_reg_5 = 0x40;
+//	error_status = writeRegisterAcc(LSM303AGR_CTRL_REG5_A, ctrl_reg_5);
+//
+//	uint8_t fifo_ctrl_reg = 0x80;
+//	error_status = writeRegisterAcc(LSM303AGR_FIFO_CTRL_REG_A, fifo_ctrl_reg);
+
+
 	return error_status;
 }
 
@@ -455,7 +463,7 @@ HAL_StatusTypeDef LSM303DLHC::writeRegisterAcc(uint8_t regAddr, uint8_t reg)
 uint8_t LSM303DLHC::readRegisterAcc(uint8_t regAddr)
 {
 	uint8_t retVal = 0;
-	HAL_I2C_Mem_Read(this->hi2c, ACC_I2C_ADDRESS | (1<<0), regAddr, 1, &retVal, 1, I2C_TIMEOUT);
+	HAL_I2C_Mem_Read(this->hi2c, ACC_I2C_ADDRESS, regAddr, 1, &retVal, 1, I2C_TIMEOUT);
 	return retVal;
 }
 
@@ -467,82 +475,22 @@ HAL_StatusTypeDef LSM303DLHC::writeRegisterMag(uint8_t regAddr, uint8_t reg)
 uint8_t LSM303DLHC::readRegisterMag(uint8_t regAddr)
 {
 	uint8_t retVal = 0;
-	HAL_I2C_Mem_Read(this->hi2c, MAG_I2C_ADDRESS | (1<<0), regAddr, 1, &retVal, 1, I2C_TIMEOUT);
+	HAL_I2C_Mem_Read(this->hi2c, MAG_I2C_ADDRESS, regAddr, 1, &retVal, 1, I2C_TIMEOUT);
 	return retVal;
 }
 
 HAL_StatusTypeDef LSM303DLHC::getAccData(int16_t* pData)
 {
-	uint8_t ctrlReg4 = 0;
-	uint8_t buffer[6];
-
-	/* Read the acceleration control register content */
-	ctrlReg4 = readRegisterAcc(LSM303AGR_CTRL_REG4_A);
-
-	/* Read output register X, Y & Z acceleration */
-	buffer[0] = readRegisterAcc(LSM303AGR_OUT_X_L_A);
-	buffer[1] = readRegisterAcc(LSM303AGR_OUT_X_H_A);
-	buffer[2] = readRegisterAcc(LSM303AGR_OUT_Y_L_A);
-	buffer[3] = readRegisterAcc(LSM303AGR_OUT_Y_H_A);
-	buffer[4] = readRegisterAcc(LSM303AGR_OUT_Z_L_A);
-	buffer[5] = readRegisterAcc(LSM303AGR_OUT_Z_H_A);
-
-	/* Check in the control register4 the data alignment*/
-	if((ctrlReg4 & LSM303DLHC_BLE_MSB))
-	{
-		for(uint8_t i=0; i<3; i++)
-		{
-			pData[i]=((int16_t)((uint16_t)buffer[2*i+1] << 8) + buffer[2*i]);
-		}
-	}
-	else /* Big Endian Mode */
-	{
-		for(uint8_t i=0; i<3; i++)
-		{
-			pData[i]=((int16_t)((uint16_t)buffer[2*i] << 8) + buffer[2*i+1]);
-		}
-	}
-
-	return HAL_OK;
+	HAL_StatusTypeDef retVal = HAL_OK;
+	retVal = HAL_I2C_Mem_Read(this->hi2c, ACC_I2C_ADDRESS, LSM303AGR_OUT_X_L_A, 1, (uint8_t*)pData, 6, I2C_TIMEOUT);
+	return retVal;
 }
 
-HAL_StatusTypeDef LSM303DLHC::getMagnetometerMeasurements(int16_t* pData)
+HAL_StatusTypeDef LSM303DLHC::getMagData(int16_t* pData)
 {
-	int8_t buffer[6];
-	uint8_t ctrlReg4 = 0;
-
-	/* Read the acceleration control register content */
-	ctrlReg4 = readRegisterAcc(LSM303AGR_CTRL_REG4_A);
-
-	/* Read output register X, Y & Z mag */
-//	buffer[0] = readRegisterMag(LSM303AGR_OUTX_H_REG_M);
-//	buffer[1] = readRegisterMag(LSM303AGR_OUTX_L_REG_M);
-//	buffer[2] = readRegisterMag(LSM303AGR_OUTY_H_REG_M);
-//	buffer[3] = readRegisterMag(LSM303AGR_OUTY_L_REG_M);
-//	buffer[4] = readRegisterMag(LSM303AGR_OUTZ_H_REG_M);
-//	buffer[5] = readRegisterMag(LSM303AGR_OUTZ_L_REG_M);
-	buffer[0] = LSM303AGR_OUTX_H_REG_M;
-	HAL_I2C_Master_Transmit(hi2c, MAG_I2C_ADDRESS, reinterpret_cast<uint8_t*>(buffer), 1, 0xff);
-
-	HAL_I2C_Master_Receive(hi2c, MAG_I2C_ADDRESS, reinterpret_cast<uint8_t*>(buffer), 6, 0xff);
-
-	/* Check in the control register4 the data alignment*/
-	if((ctrlReg4 & LSM303DLHC_BLE_MSB))
-	{
-		for(uint8_t i=0; i<3; i++)
-		{
-			pData[i]=((int16_t)((uint16_t)buffer[2*i+1] << 8) + buffer[2*i]);
-		}
-	}
-	else /* Big Endian Mode */
-	{
-		for(uint8_t i=0; i<3; i++)
-		{
-			pData[i]=((int16_t)((uint16_t)buffer[2*i] << 8) + buffer[2*i+1]);
-		}
-	}
-
-	return HAL_OK;
+	HAL_StatusTypeDef retVal = HAL_OK;
+	retVal = HAL_I2C_Mem_Read(this->hi2c, MAG_I2C_ADDRESS, LSM303AGR_OUTX_L_REG_M, 1, (uint8_t*)pData, 6, I2C_TIMEOUT);
+	return retVal;
 }
 
 int16_t LSM303DLHC::getTemperature()
