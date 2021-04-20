@@ -31,7 +31,7 @@ class SerialPlotter:
         self.line3, = self.ax.plot(self.x, self.allData['MagZ'], label='MagZ')
         plt.ylim(-1000, 1000)
         plt.legend()
-        #plt.ylabel('мкТл')
+        plt.ylabel('мГс')
         plt.tight_layout()
         plt.grid()
 
