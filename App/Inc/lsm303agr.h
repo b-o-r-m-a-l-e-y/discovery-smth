@@ -1,12 +1,12 @@
 /*
- * lsm303dlhc.h
+ * lsm303agr.h
  *
  *  Created on: Mar 30, 2021
  *      Author: bormaley
  */
 
-#ifndef LSM303DLHC_H_
-#define LSM303DLHC_H_
+#ifndef LSM303AGR_H_
+#define LSM303AGR_H_
 
 #include "main.h"
 
@@ -47,10 +47,10 @@ struct CTRL_REG4_A {
 	uint8_t SIM        : 1;
 } __attribute__((packed));
 
-class LSM303DLHC {
+class LSM303AGR {
 public:
-	LSM303DLHC(I2C_HandleTypeDef* hi2c, GPIO_TypeDef* DRDY_GPIO, uint32_t DRDY_pin);
-	~LSM303DLHC();
+	LSM303AGR(I2C_HandleTypeDef* hi2c, GPIO_TypeDef* DRDY_GPIO, uint32_t DRDY_pin);
+	~LSM303AGR();
 
 	/*
 	 * Accelerometer functions
@@ -79,6 +79,9 @@ private:
 	GPIO_TypeDef*  DRDY_GPIO;
 	HAL_StatusTypeDef error_status = HAL_OK;
 
+	uint8_t accStatus = 0;
+	uint8_t magStatus = 0;
+
 };
 
-#endif /* LSM303DLHC_H_ */
+#endif /* LSM303AGR_H_ */

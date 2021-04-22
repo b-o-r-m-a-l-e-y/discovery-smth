@@ -29,7 +29,7 @@ class SerialPlotter:
         self.line, = self.ax.plot(self.x, self.allData['AccX'], label='AccX')
         self.line2, = self.ax.plot(self.x, self.allData['AccY'], label='AccY')
         self.line3, = self.ax.plot(self.x, self.allData['AccZ'], label='AccZ')
-        plt.ylim(-1000, 1000)
+        plt.ylim(-60000, 60000)
         plt.legend()
         plt.tight_layout()
         plt.grid()
@@ -41,7 +41,7 @@ class SerialPlotter:
 
     def _animate(self, i):
         self.line.set_ydata(self.allData['AccX'])
-    
+
     def _animate2(self, i):
         self.line2.set_ydata(self.allData['AccY'])
 
@@ -58,10 +58,7 @@ class SerialPlotter:
                         prepared = line.decode('utf-8').strip(' ').split(' ')
                         for elem in prepared:
                             splitted = elem.split('=')
-                            if splitted[0] == 'AccX' or splitted[0] == 'AccY' or splitted[0] == 'AccZ':
-                                self.allData[splitted[0]].append(int(splitted[1]))
-                            else:
-                                self.allData[splitted[0]].append(int(splitted[1]))
+                            self.allData[splitted[0]].append(int(splitted[1]))
                 except Exception as e:
                     print(e)
             else:

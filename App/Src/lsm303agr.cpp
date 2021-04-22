@@ -1,5 +1,5 @@
 /*
- * lsm303dlhc.cpp
+ * lsm303agr.cpp
  *
  *  Created on: Mar 30, 2021
  *      Author: bormaley
@@ -90,65 +90,78 @@
 /**************************** END REGISTER MAPPING  ***************************/
 /******************************************************************************/
 
-#define I_AM_LMS303DLHC                   ((uint8_t)0x33)
+/*
+ * ---------------------------------------------------------
+ * CTRL_REG1_A bits
+ */
+#define LSM303AGR_ODR_1_HZ                ((uint8_t)0x10)  /*!< Output Data Rate = 1 Hz */
+#define LSM303AGR_ODR_10_HZ               ((uint8_t)0x20)  /*!< Output Data Rate = 10 Hz */
+#define LSM303AGR_ODR_25_HZ               ((uint8_t)0x30)  /*!< Output Data Rate = 25 Hz */
+#define LSM303AGR_ODR_50_HZ               ((uint8_t)0x40)  /*!< Output Data Rate = 50 Hz */
+#define LSM303AGR_ODR_100_HZ              ((uint8_t)0x50)  /*!< Output Data Rate = 100 Hz */
+#define LSM303AGR_ODR_200_HZ              ((uint8_t)0x60)  /*!< Output Data Rate = 200 Hz */
+#define LSM303AGR_ODR_400_HZ              ((uint8_t)0x70)  /*!< Output Data Rate = 400 Hz */
+#define LSM303AGR_ODR_1620_HZ_LP          ((uint8_t)0x80)  /*!< Output Data Rate = 1620 Hz only in Low Power Mode */
+#define LSM303AGR_ODR_1344_HZ             ((uint8_t)0x90)  /*!< Output Data Rate = 1344 Hz in Normal mode and 5376 Hz in Low Power Mode */
 
-/** @defgroup Acc_Power_Mode_selection
-  * @{
-  */
-#define LSM303DLHC_NORMAL_MODE            ((uint8_t)0x00)
-#define LSM303DLHC_LOWPOWER_MODE          ((uint8_t)0x08)
-/**
-  * @}
-  */
+#define LSM303AGR_NORMAL_MODE             ((uint8_t)0x00)
+#define LSM303AGR_LOWPOWER_MODE           ((uint8_t)0x08)
 
-/** @defgroup Acc_OutPut_DataRate_Selection
-  * @{
-  */
-#define LSM303DLHC_ODR_1_HZ                ((uint8_t)0x10)  /*!< Output Data Rate = 1 Hz */
-#define LSM303DLHC_ODR_10_HZ               ((uint8_t)0x20)  /*!< Output Data Rate = 10 Hz */
-#define LSM303DLHC_ODR_25_HZ               ((uint8_t)0x30)  /*!< Output Data Rate = 25 Hz */
-#define LSM303DLHC_ODR_50_HZ               ((uint8_t)0x40)  /*!< Output Data Rate = 50 Hz */
-#define LSM303DLHC_ODR_100_HZ              ((uint8_t)0x50)  /*!< Output Data Rate = 100 Hz */
-#define LSM303DLHC_ODR_200_HZ              ((uint8_t)0x60)  /*!< Output Data Rate = 200 Hz */
-#define LSM303DLHC_ODR_400_HZ              ((uint8_t)0x70)  /*!< Output Data Rate = 400 Hz */
-#define LSM303DLHC_ODR_1620_HZ_LP          ((uint8_t)0x80)  /*!< Output Data Rate = 1620 Hz only in Low Power Mode */
-#define LSM303DLHC_ODR_1344_HZ             ((uint8_t)0x90)  /*!< Output Data Rate = 1344 Hz in Normal mode and 5376 Hz in Low Power Mode */
-/**
-  * @}
-  */
+#define LSM303AGR_X_ENABLE                ((uint8_t)0x01)
+#define LSM303AGR_Y_ENABLE                ((uint8_t)0x02)
+#define LSM303AGR_Z_ENABLE                ((uint8_t)0x04)
+#define LSM303AGR_AXES_ENABLE             ((uint8_t)0x07)
+#define LSM303AGR_AXES_DISABLE            ((uint8_t)0x00)
+/*
+ * ---------------------------------------------------------
+ */
 
-/** @defgroup Acc_Axes_Selection
-  * @{
-  */
-#define LSM303DLHC_X_ENABLE                ((uint8_t)0x01)
-#define LSM303DLHC_Y_ENABLE                ((uint8_t)0x02)
-#define LSM303DLHC_Z_ENABLE                ((uint8_t)0x04)
-#define LSM303DLHC_AXES_ENABLE             ((uint8_t)0x07)
-#define LSM303DLHC_AXES_DISABLE            ((uint8_t)0x00)
-/**
-  * @}
-  */
+/*
+ * ---------------------------------------------------------
+ * CTRL_REG4_A bits
+ */
+#define LSM303AGR_BlockUpdate_Continous   ((uint8_t)0x00) /*!< Continuos Update */
+#define LSM303AGR_BlockUpdate_Single      ((uint8_t)0x80) /*!< Single Update: output registers not updated until MSB and LSB reading */
 
-/** @defgroup Acc_High_Resolution
-  * @{
-  */
-#define LSM303DLHC_HR_ENABLE               ((uint8_t)0x08)
-#define LSM303DLHC_HR_DISABLE              ((uint8_t)0x00)
-/**
-  * @}
-  */
+#define LSM303AGR_BLE_LSB                 ((uint8_t)0x00) /*!< Little Endian: data LSB @ lower address */
+#define LSM303AGR_BLE_MSB                 ((uint8_t)0x40) /*!< Big Endian: data MSB @ lower address */
 
-/** @defgroup Acc_Full_Scale_Selection
-  * @{
-  */
-#define LSM303DLHC_FULLSCALE_2G            ((uint8_t)0x00)  /*!< �2 g */
-#define LSM303DLHC_FULLSCALE_4G            ((uint8_t)0x10)  /*!< �4 g */
-#define LSM303DLHC_FULLSCALE_8G            ((uint8_t)0x20)  /*!< �8 g */
-#define LSM303DLHC_FULLSCALE_16G           ((uint8_t)0x30)  /*!< �16 g */
-/**
-  * @}
-  */
+#define LSM303AGR_FULLSCALE_2G            ((uint8_t)0x00)  /*!< 2 g */
+#define LSM303AGR_FULLSCALE_4G            ((uint8_t)0x10)  /*!< 4 g */
+#define LSM303AGR_FULLSCALE_8G            ((uint8_t)0x20)  /*!< 8 g */
+#define LSM303AGR_FULLSCALE_16G           ((uint8_t)0x30)  /*!< 16 g */
 
+#define LSM303AGR_HR_ENABLE              ((uint8_t)0x08)
+#define LSM303AGR_HR_DISABLE             ((uint8_t)0x00)
+
+#define LSM303AGR_NORMAL_MODE             ((uint8_t)0x00)
+#define LSM303AGR_SELF_TEST_0             ((uint8_t)0x02)
+#define LSM303AGR_SELF_TEST_1             ((uint8_t)0x04)
+/*
+ * ---------------------------------------------------------
+ */
+
+/*
+ * ---------------------------------------------------------
+ * CTRL_REG5_A bits
+ */
+#define LSM303AGR_BOOT_NORMAL             ((uint8_t)0x00)
+#define LSM303AGR_REBOOT_MEMORY           ((uint8_t)0x80)
+
+#define LSM303AGR_FIFO_DISABLE            ((uint8_t)0x00)
+#define LSM303AGR_FIFO_ENABLE             ((uint8_t)0x40)
+
+#define LSM303AGR_LIR_INT1_NOT_LATCHED    ((uint8_t)0x00)
+#define LSM303AGR_LIR_INT1_LATCHED        ((uint8_t)0x08)
+
+#define LSM303AGR_D4D_INT1_DISABLE        ((uint8_t)0x00)
+#define LSM303AGR_D4D_INT1_ENABLE         ((uint8_t)0x04)
+
+#define LSM303AGR_LIR_INT2_NOT_LATCHED    ((uint8_t)0x00)
+#define LSM303AGR_LIR_INT2_LATCHED        ((uint8_t)0x02)
+
+#define LSM303AGR_D4D_INT2_DISABLE        ((uint8_t)0x00)
+#define LSM303AGR_D4D_INT2_ENABLE         ((uint8_t)0x01)
 /** @defgroup Acc_Full_Scale_Selection
   * @{
   */
@@ -163,17 +176,11 @@
 /** @defgroup Acc_Block_Data_Update
   * @{
   */
-#define LSM303DLHC_BlockUpdate_Continous   ((uint8_t)0x00) /*!< Continuos Update */
-#define LSM303DLHC_BlockUpdate_Single      ((uint8_t)0x80) /*!< Single Update: output registers not updated until MSB and LSB reading */
-/**
-  * @}
-  */
 
 /** @defgroup Acc_Endian_Data_selection
   * @{
   */
-#define LSM303DLHC_BLE_LSB                 ((uint8_t)0x00) /*!< Little Endian: data LSB @ lower address */
-#define LSM303DLHC_BLE_MSB                 ((uint8_t)0x40) /*!< Big Endian: data MSB @ lower address */
+
 /**
   * @}
   */
@@ -330,28 +337,15 @@
 #define LSM303AGR_COMP_TEMP_EN              ((uint8_t)0x80)
 #define LSM303AGR_REBOOT_MEM                ((uint8_t)0x40)
 
-#define LSM303AGR_ODR_10_HZ                 ((uint8_t)0x00)
-#define LSM303AGR_ODR_20_HZ                 ((uint8_t)0x04)
-#define LSM303AGR_ODR_50_HZ                 ((uint8_t)0x08)
-#define LSM303AGR_ODR_100_HZ                ((uint8_t)0x0C)
+#define LSM303AGR_ODR_10_HZ_M                 ((uint8_t)0x00)
+#define LSM303AGR_ODR_20_HZ_M                 ((uint8_t)0x04)
+#define LSM303AGR_ODR_50_HZ_M                 ((uint8_t)0x08)
+#define LSM303AGR_ODR_100_HZ_M                ((uint8_t)0x0C)
 
 #define LSM303AGR_MODE_CONTINUOUS           (uint8_t)0x00)
 
-/** @defgroup Mag_Data_Rate
-  * @{
-  */
-#define LSM303DLHC_ODR_0_75_HZ              ((uint8_t) 0x00)  /*!< Output Data Rate = 0.75 Hz */
-#define LSM303DLHC_ODR_1_5_HZ               ((uint8_t) 0x04)  /*!< Output Data Rate = 1.5 Hz */
-#define LSM303DLHC_ODR_3_0_HZ               ((uint8_t) 0x08)  /*!< Output Data Rate = 3 Hz */
-#define LSM303DLHC_ODR_7_5_HZ               ((uint8_t) 0x0C)  /*!< Output Data Rate = 7.5 Hz */
-#define LSM303DLHC_ODR_15_HZ                ((uint8_t) 0x10)  /*!< Output Data Rate = 15 Hz */
-#define LSM303DLHC_ODR_30_HZ                ((uint8_t) 0x14)  /*!< Output Data Rate = 30 Hz */
-#define LSM303DLHC_ODR_75_HZ                ((uint8_t) 0x18)  /*!< Output Data Rate = 75 Hz */
-#define LSM303DLHC_ODR_220_HZ               ((uint8_t) 0x1C)  /*!< Output Data Rate = 220 Hz */
-/**
-  * @}
-  */
-
+#define LSM303AGR_BDU_ENABLE_M              ((uint8_t)0x10)
+#define LSM303AGR_BDU_DISABLE_M             ((uint8_t)0x00)
 /** @defgroup Mag_Full_Scale
   * @{
   */
@@ -406,94 +400,110 @@
 
 #define I2C_TIMEOUT   100
 
-LSM303DLHC::~LSM303DLHC()
+LSM303AGR::~LSM303AGR()
 {
 
 }
 
-LSM303DLHC::LSM303DLHC(I2C_HandleTypeDef* hi2c, GPIO_TypeDef* DRDY_GPIO, uint32_t DRDY_pin)
+LSM303AGR::LSM303AGR(I2C_HandleTypeDef* hi2c, GPIO_TypeDef* DRDY_GPIO, uint32_t DRDY_pin)
 {
 	this->hi2c = hi2c;
 	this->DRDY_pin = DRDY_pin;
 	this->DRDY_GPIO = DRDY_GPIO;
 }
 
-HAL_StatusTypeDef LSM303DLHC::initAcc()
+HAL_StatusTypeDef LSM303AGR::initAcc()
 {
-	uint8_t ctrl_reg_1 = LSM303DLHC_ODR_100_HZ |
-			LSM303DLHC_X_ENABLE | LSM303DLHC_Y_ENABLE | LSM303DLHC_Z_ENABLE;
+	if (readAccID() & ACC_I2C_ADDRESS) accStatus = 1;
+	else accStatus = 0;
+
+	uint8_t ctrl_reg_1 = LSM303AGR_ODR_50_HZ | LSM303AGR_AXES_ENABLE;
 	error_status = writeRegisterAcc(LSM303AGR_CTRL_REG1_A, ctrl_reg_1);
 
-	uint8_t ctrl_reg_4 = 0x38;
+	error_status = writeRegisterAcc(LSM303AGR_CTRL_REG2_A, 0x00);
+	error_status = writeRegisterAcc(LSM303AGR_CTRL_REG3_A, 0x00);
+
+	uint8_t ctrl_reg_4 = LSM303AGR_FULLSCALE_2G | LSM303AGR_HR_ENABLE;
 	error_status = writeRegisterAcc(LSM303AGR_CTRL_REG4_A, ctrl_reg_4);
 
-//	uint8_t ctrl_reg_5 = 0x40;
-//	error_status = writeRegisterAcc(LSM303AGR_CTRL_REG5_A, ctrl_reg_5);
 //
-//	uint8_t fifo_ctrl_reg = 0x80;
-//	error_status = writeRegisterAcc(LSM303AGR_FIFO_CTRL_REG_A, fifo_ctrl_reg);
-
-
+//	error_status = writeRegisterAcc(LSM303AGR_CTRL_REG6_A, 0x00);
+//	error_status = writeRegisterAcc(LSM303AGR_FIFO_CTRL_REG_A, 0x00);
+//
+//	error_status = writeRegisterAcc(LSM303AGR_Act_THS_A, 0x00);
+//	error_status = writeRegisterAcc(LSM303AGR_Act_DUR_A, 0x00);
+//
+//	//FIFO
+//	error_status = writeRegisterAcc(LSM303AGR_CTRL_REG5_A, 0x00);
 	return error_status;
 }
 
-HAL_StatusTypeDef LSM303DLHC::initMag()
+HAL_StatusTypeDef LSM303AGR::initMag()
 {
-	error_status = writeRegisterMag(LSM303AGR_CFG_REG_A_M, LSM303AGR_ODR_50_HZ);
+	if (readMagID() & MAG_I2C_ADDRESS) magStatus = 1;
+	else magStatus = 0;
 
-	error_status = writeRegisterMag(LSM303AGR_CFG_REG_C_M, 0x01);
+	error_status = writeRegisterMag(LSM303AGR_CFG_REG_A_M, LSM303AGR_ODR_100_HZ_M);
+	error_status = writeRegisterMag(LSM303AGR_CFG_REG_C_M, LSM303AGR_BDU_ENABLE_M);
 	return error_status;
 }
 
-uint8_t LSM303DLHC::readAccID()
+uint8_t LSM303AGR::readAccID()
 {
-	return readRegisterAcc(LSM303AGR_WHO_AM_I_A) & ~(1<<0);
+	return readRegisterAcc(LSM303AGR_WHO_AM_I_A);
 }
 
-uint8_t LSM303DLHC::readMagID()
+uint8_t LSM303AGR::readMagID()
 {
-	return readRegisterMag(LSM303AGR_WHO_AM_I_M) & ~(1<<0);
+	return readRegisterMag(LSM303AGR_WHO_AM_I_M);
 }
 
-HAL_StatusTypeDef LSM303DLHC::writeRegisterAcc(uint8_t regAddr, uint8_t reg)
+HAL_StatusTypeDef LSM303AGR::writeRegisterAcc(uint8_t regAddr, uint8_t reg)
 {
 	return HAL_I2C_Mem_Write(this->hi2c, ACC_I2C_ADDRESS, regAddr, 1, &reg, 1, I2C_TIMEOUT);
 }
 
-uint8_t LSM303DLHC::readRegisterAcc(uint8_t regAddr)
+uint8_t LSM303AGR::readRegisterAcc(uint8_t regAddr)
 {
 	uint8_t retVal = 0;
 	HAL_I2C_Mem_Read(this->hi2c, ACC_I2C_ADDRESS, regAddr, 1, &retVal, 1, I2C_TIMEOUT);
 	return retVal;
 }
 
-HAL_StatusTypeDef LSM303DLHC::writeRegisterMag(uint8_t regAddr, uint8_t reg)
+HAL_StatusTypeDef LSM303AGR::writeRegisterMag(uint8_t regAddr, uint8_t reg)
 {
 	return HAL_I2C_Mem_Write(this->hi2c, MAG_I2C_ADDRESS, regAddr, 1, &reg, 1, I2C_TIMEOUT);
 }
 
-uint8_t LSM303DLHC::readRegisterMag(uint8_t regAddr)
+uint8_t LSM303AGR::readRegisterMag(uint8_t regAddr)
 {
 	uint8_t retVal = 0;
 	HAL_I2C_Mem_Read(this->hi2c, MAG_I2C_ADDRESS, regAddr, 1, &retVal, 1, I2C_TIMEOUT);
 	return retVal;
 }
 
-HAL_StatusTypeDef LSM303DLHC::getAccData(int16_t* pData)
+HAL_StatusTypeDef LSM303AGR::getAccData(int16_t* pData)
 {
 	HAL_StatusTypeDef retVal = HAL_OK;
-	retVal = HAL_I2C_Mem_Read(this->hi2c, ACC_I2C_ADDRESS, LSM303AGR_OUT_X_L_A, 1, (uint8_t*)pData, 6, I2C_TIMEOUT);
+	uint8_t buffer[6] = {0, 0, 0, 0, 0, 0};
+	uint8_t reg = LSM303AGR_OUT_X_L_A;
+	for (uint8_t i = 0; i < 6; i ++) {
+		retVal = HAL_I2C_Mem_Read(this->hi2c, ACC_I2C_ADDRESS, reg++, 1, (uint8_t*)&buffer[i], 1, I2C_TIMEOUT);
+	}
+	for (uint8_t i = 0; i < 3; i++) {
+		pData[i] = static_cast<int16_t>(buffer[2*i+1] << 8 | buffer[2*i]);
+	}
 	return retVal;
 }
 
-HAL_StatusTypeDef LSM303DLHC::getMagData(int16_t* pData)
+HAL_StatusTypeDef LSM303AGR::getMagData(int16_t* pData)
 {
 	HAL_StatusTypeDef retVal = HAL_OK;
 	retVal = HAL_I2C_Mem_Read(this->hi2c, MAG_I2C_ADDRESS, LSM303AGR_OUTX_L_REG_M, 1, (uint8_t*)pData, 6, I2C_TIMEOUT);
 	return retVal;
 }
 
-int16_t LSM303DLHC::getTemperature()
+int16_t LSM303AGR::getTemperature()
 {
 	int16_t pnRawData;
 	uint8_t ctrlx[2] = {0,0};
@@ -505,13 +515,5 @@ int16_t LSM303DLHC::getTemperature()
 	buffer[0] = readRegisterAcc(LSM303AGR_OUT_TEMP_H_A);
 	buffer[1] = readRegisterAcc(LSM303AGR_OUT_TEMP_L_A);
 
-	if(!(ctrlx[0] & LSM303DLHC_BLE_MSB))
-	{
-		pnRawData=((int16_t)((uint16_t)buffer[1] << 8) + buffer[0]);
-	}
-	else /* Big Endian Mode */
-	{
-		pnRawData=((int16_t)((uint16_t)buffer[0] << 8) + buffer[1]);
-	}
 	return pnRawData;
 }
