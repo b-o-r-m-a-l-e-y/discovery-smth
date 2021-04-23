@@ -417,7 +417,7 @@ HAL_StatusTypeDef LSM303AGR::initAcc()
 	if (readAccID() & ACC_I2C_ADDRESS) accStatus = 1;
 	else accStatus = 0;
 
-	uint8_t ctrl_reg_1 = LSM303AGR_ODR_50_HZ | LSM303AGR_AXES_ENABLE;
+	uint8_t ctrl_reg_1 = LSM303AGR_ODR_100_HZ | LSM303AGR_AXES_ENABLE;
 	error_status = writeRegisterAcc(LSM303AGR_CTRL_REG1_A, ctrl_reg_1);
 
 	error_status = writeRegisterAcc(LSM303AGR_CTRL_REG2_A, 0x00);
@@ -426,15 +426,6 @@ HAL_StatusTypeDef LSM303AGR::initAcc()
 	uint8_t ctrl_reg_4 = LSM303AGR_FULLSCALE_2G | LSM303AGR_HR_ENABLE;
 	error_status = writeRegisterAcc(LSM303AGR_CTRL_REG4_A, ctrl_reg_4);
 
-//
-//	error_status = writeRegisterAcc(LSM303AGR_CTRL_REG6_A, 0x00);
-//	error_status = writeRegisterAcc(LSM303AGR_FIFO_CTRL_REG_A, 0x00);
-//
-//	error_status = writeRegisterAcc(LSM303AGR_Act_THS_A, 0x00);
-//	error_status = writeRegisterAcc(LSM303AGR_Act_DUR_A, 0x00);
-//
-//	//FIFO
-//	error_status = writeRegisterAcc(LSM303AGR_CTRL_REG5_A, 0x00);
 	return error_status;
 }
 
@@ -491,7 +482,7 @@ HAL_StatusTypeDef LSM303AGR::getAccData(int16_t* pData)
 		retVal = HAL_I2C_Mem_Read(this->hi2c, ACC_I2C_ADDRESS, reg++, 1, (uint8_t*)&buffer[i], 1, I2C_TIMEOUT);
 	}
 	for (uint8_t i = 0; i < 3; i++) {
-		pData[i] = static_cast<int16_t>(buffer[2*i+1] << 8 | buffer[2*i]);
+		pData[i] = (static_cast<int16_t>(buffer[2*i+1] << 8 | buffer[2*i]) >> 4);
 	}
 	return retVal;
 }

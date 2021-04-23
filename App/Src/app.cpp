@@ -49,11 +49,10 @@ void MainApp::run()
 //			uint8_t n = sprintf(buffer, "AccX=%i AccY=%i AccZ=%i ", dataAcc[0], dataAcc[1], dataAcc[2]);
 //			CDC_Transmit_FS((uint8_t*)buffer, n);
 //		}
-		while (xQueueReceive(txBuffer, &accDataStruct, portMAX_DELAY)) {
+		if (xQueueReceive(txBuffer, &accDataStruct, portMAX_DELAY)) {
 			uint8_t n = sprintf(buffer, "AccX=%i AccY=%i AccZ=%i ", accDataStruct.accX, accDataStruct.accY, accDataStruct.accZ);
 			CDC_Transmit_FS((uint8_t*)buffer, n);
 		}
-		osDelay(100);
 		HAL_GPIO_TogglePin(LD4_GPIO_Port, LD4_Pin);
 	}
 }
