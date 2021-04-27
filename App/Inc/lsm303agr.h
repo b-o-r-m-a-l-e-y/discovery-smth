@@ -47,6 +47,32 @@ struct CTRL_REG4_A {
 	uint8_t SIM        : 1;
 } __attribute__((packed));
 
+
+enum LSM303AGR_ACC_ODR {
+	LSM303AGR_ODR_1_HZ         = 0x10,
+	LSM303AGR_ODR_10_HZ        = 0x20,
+	LSM303AGR_ODR_25_HZ        = 0x30,
+	LSM303AGR_ODR_50_HZ        = 0x40,
+	LSM303AGR_ODR_100_HZ       = 0x50,
+	LSM303AGR_ODR_200_HZ       = 0x60,
+	LSM303AGR_ODR_400_HZ       = 0x70,
+	LSM303AGR_ODR_1620_HZ_LP   = 0x80,
+	LSM303AGR_ODR_1344_HZ      = 0x90
+};
+
+enum LSM303AGR_ACC_SENSITIVITY {
+	LSM303AGR_ACC_SENSITIVITY_2G   = 0x00,
+	LSM303AGR_ACC_SENSITIVITY_4G   = 0x10,
+	LSM303AGR_ACC_SENSITIVITY_8G   = 0x20,
+	LSM303AGR_ACC_SENSITIVITY_16G  = 0x30
+};
+
+enum LSM303AGR_ACC_MODE {
+	LSM303AGR_ACC_MODE_Normal,
+	LSM303AGR_ACC_MODE_Low_power,
+	LSM303AGR_ACC_MODE_High_res
+};
+
 class LSM303AGR {
 public:
 	LSM303AGR(I2C_HandleTypeDef* hi2c, GPIO_TypeDef* DRDY_GPIO, uint32_t DRDY_pin);
@@ -82,6 +108,8 @@ private:
 	uint8_t accStatus = 0;
 	uint8_t magStatus = 0;
 
+	LSM303AGR_ACC_MODE powerMode;
+	LSM303AGR_ACC_SENSITIVITY sensitivity;
 };
 
 #endif /* LSM303AGR_H_ */

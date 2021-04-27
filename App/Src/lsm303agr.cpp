@@ -173,18 +173,6 @@
   * @}
   */
 
-/** @defgroup Acc_Block_Data_Update
-  * @{
-  */
-
-/** @defgroup Acc_Endian_Data_selection
-  * @{
-  */
-
-/**
-  * @}
-  */
-
 /** @defgroup Acc_Boot_Mode_selection
   * @{
   */
@@ -400,6 +388,20 @@
 
 #define I2C_TIMEOUT   100
 
+
+#define LSM303AGR_ACC_GAIN_HR_2g      = 0.98,
+#define LSM303AGR_ACC_GAIN_HR_4g      = 1.95,
+#define LSM303AGR_ACC_GAIN_HR_8g      = 3.9,
+#define LSM303AGR_ACC_GAIN_HR_16g     = 11.72,
+#define LSM303AGR_ACC_GAIN_Normal_2g  = 3.9,
+#define LSM303AGR_ACC_GAIN_Normal_4g  = 7.82,
+#define LSM303AGR_ACC_GAIN_Normal_8g  = 15.63,
+#define LSM303AGR_ACC_GAIN_Normal_16g = 46.9,
+#define LSM303AGR_ACC_GAIN_LP_2g      = 15.63,
+#define LSM303AGR_ACC_GAIN_LP_4g      = 31.26,
+#define LSM303AGR_ACC_GAIN_LP_8g      = 62.52,
+#define LSM303AGR_ACC_GAIN_LP_16g     = 187.58
+
 LSM303AGR::~LSM303AGR()
 {
 
@@ -425,6 +427,9 @@ HAL_StatusTypeDef LSM303AGR::initAcc()
 
 	uint8_t ctrl_reg_4 = LSM303AGR_FULLSCALE_2G | LSM303AGR_HR_ENABLE;
 	error_status = writeRegisterAcc(LSM303AGR_CTRL_REG4_A, ctrl_reg_4);
+
+	powerMode = LSM303AGR_ACC_MODE_High_res;
+	sensitivity = LSM303AGR_ACC_SENSITIVITY_2G;
 
 	return error_status;
 }

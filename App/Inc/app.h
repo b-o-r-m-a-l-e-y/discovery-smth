@@ -17,10 +17,13 @@
 extern "C" void main_app_wrp();
 extern "C" void getAccDataTaskC(void *argument);
 
-struct accData_t {
+struct lsm303agrData_t {
 	int16_t accX;
 	int16_t accY;
 	int16_t accZ;
+	int16_t magX;
+	int16_t magY;
+	int16_t magZ;
 };
 
 class MainApp {
@@ -37,12 +40,13 @@ public:
 	MainApp& operator=(MainApp&&)     = delete;
 
 	void run();
-	void getAccDataTask();
+	void getAccMagDataTask();
 private:
 	MainApp();
 
 	osThreadId_t getDataTaskHandle;
 	xQueueHandle txBuffer;
+	lsm303agrData_t lsm303agrData;
 
 	LSM303AGR lsm303agr;
 };
